@@ -9,7 +9,9 @@ let useUI2 = (config: UI2Config) => {
 		context: {},
 		debounceDelay: 300,
 		onIntent: () => {},
-		onSubmitStart: () => {},
+		onSubmitStart: () => {
+			setInputVal("")
+		},
 		onSubmitComplete: () => {},
 	};
 
