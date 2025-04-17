@@ -5,16 +5,15 @@ import { LanguageModel } from "ai";
 export type CleanupFunction = () => void;
 
 export type UI2CreatorConfig = {
-	model: LanguageModel;
-	systemPrompt: string;
-	context:
+	model:
+		| LanguageModel
 		| {
-				[key: string]: {
-					description: string;
-					content: any;
-				};
-		  }
-		| undefined;
+				baseURL: string;
+				apiKey: string;
+				modelId: string;
+		  };
+	systemPrompt: string;
+	context: object;
 	debounceDelay: number;
 	onIntent: (input?: string) => void | CleanupFunction;
 	onSubmitStart: (input?: string) => void;

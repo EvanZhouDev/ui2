@@ -10,9 +10,10 @@ import debounce, { DebouncedFunction } from "debounce";
 import { z } from "zod";
 import { flushSync } from "react-dom";
 import zodToJsonSchema from "zod-to-json-schema";
-import { streamText } from "ai";
+import { LanguageModel, streamText } from "ai";
 import parseIntentCalls from "./parseIntentCall";
 import { nanoid } from "nanoid";
+import { createOpenAI } from "@ai-sdk/openai";
 
 export default class IntentCreator {
 	private cleanup = new Map<string, () => void>();
@@ -115,8 +116,19 @@ ${text}`;
 		this.setIsLoading(true);
 
 		try {
+			let model: LanguageModel;
+			if ("specificationVersion" in this.config.model) {
+				model = this.config.model as LanguageModel;
+			} else {
+				model = createOpenAI({
+					// custom settings, e.g.
+					apiKey: this.config.model.apiKey,
+					baseURL: this.config.model.baseURL,
+				})(this.config.model.modelId);
+			}
+
 			const { textStream } = streamText({
-				model: this.config.model,
+				model,
 				prompt: this.createPrompt(text),
 				temperature: 0,
 			});
@@ -134,6 +146,7 @@ ${text}`;
 			const updatedIntentCalls: IntentCall[] = [];
 			for await (const textPart of textStream) {
 				partialOutput += textPart;
+
 				const partialIntentCalls = parseIntentCalls(
 					partialOutput,
 					this.intents
