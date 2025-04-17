@@ -1,0 +1,26 @@
+{
+	"name": "ui2.js",
+	"version": "0.1.0",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "npx tsup index.ts --dts",
+		"dev": "npx tsup index.ts --dts --watch"
+	},
+	"dependencies": {
+		"debounce": "^2.2.0",
+		"nanoid": "^5.1.5",
+		"zod": "^3.24.2",
+        "ai": ">=4.0.0",
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0"
+	},
+    "type": "module",
+	"devDependencies": {
+		"tsup": "^8.4.0"
+	}
+}
