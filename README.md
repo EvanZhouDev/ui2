@@ -44,7 +44,9 @@ But at the same time, UI2 can also be used for other "preview-before-committing"
 
 UI2 stands for the Unified Intent Interface.
 
-However, the naming also implies the "Second-Generation" of UI
+However, the naming also implies the "Second-Generation" of UI.
+
+You should solely refer to the project as UI2 or ui2 and not in other forms, like "UII", "UI Two", and so on.
 
 ## Install
 
