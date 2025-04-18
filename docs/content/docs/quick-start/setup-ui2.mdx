@@ -3,11 +3,144 @@ title: Setting Up UI2
 description: Set up everything you need to use UI2
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+Let's start by creating a state for all our todos, and a simple UI to render all our todos as well as the UI2 input box and submit button.
 
-## What is Next?
+Update your `page.tsx` with a few changes:
 
-<Cards>
-	<Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-	<Card title="Learn more about Fumadocs" href="https://fumadocs.vercel.app" />
-</Cards>
+```jsx
+"use client";
+import useUI2 from "ui2.js";
+import { useState } from "react";
+
+export default function Page() {
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+            preview: string;
+		}[]
+	>([]);
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input className="p-1 outline" />
+				<button className="p-1 outline">Submit</button>
+			</div>
+		</div>
+	);
+}
+```
+
+We're also including a `preview` field and UI state to each reminder. It'll make more sense when we start making intents.
+
+Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. The Here's what it should look like:
+
+```jsx
+let { inputValue, onInputChange, onSubmit } = useUI2({
+	// config here...
+});
+```
+
+Let's update our input and submit button to use these returned variables:
+
+```jsx
+<div className="flex flex-row gap-2">
+	<input className="p-1 outline" value={inputValue} onChange={onInputChange} />
+	<button className="p-1 outline" onClick={onSubmit}>
+		Submit
+	</button>
+</div>
+```
+
+Next, before we configure our `useUI2`, we need to choose a model to run UI2 with. It is highly recommended to use the [Cerebras Instant Inference API](https://www.cerebras.ai/).
+
+UI2 supports usage with the [Vercel AI SDK](https://sdk.vercel.ai/providers/ai-sdk-providers), so we can simply set up a model as such:
+
+```jsx
+import { createCerebras } from "@ai-sdk/cerebras";
+
+const cerebras = createCerebras({
+	apiKey: "YOUR_API_KEY",
+});
+```
+
+Now, we can update our `useUI2` call to use the Cerebras model and also provide a System Prompt to tell the model what app we're making:
+
+```jsx
+let { inputValue, onInputChange, onSubmit } = useUI2({
+	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	systemPrompt: "This is a reminders app.",
+});
+```
+
+Finally, we have to give the model access to our reminders. We can use the `context` field to pass in any relevant state object.
+
+```jsx
+let { inputValue, onInputChange, onSubmit } = useUI2({
+	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	systemPrompt: "This is a todo app.",
+	context: todos,
+});
+```
+
+Altogether, your file should look like this:
+
+```jsx
+"use client";
+import useUI2 from "ui2.js";
+import { createCerebras } from "@ai-sdk/cerebras";
+import { useState } from "react";
+
+export default function Page() {
+	const cerebras = createCerebras({
+		apiKey: "YOUR_API_KEY",
+	});
+
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+            status: boolean;
+		}[]
+	>([]);
+
+	let { inputValue, onInputChange, onSubmit } = useUI2({
+		model: cerebras("llama-4-scout-17b-16e-instruct"),
+		systemPrompt: "This is a todo app.",
+		debounceDelay: 300,
+		context: todos,
+	});
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input
+					className="p-1 outline"
+					value={inputValue}
+					onChange={onInputChange}
+				/>
+				<button className="p-1 outline" onClick={onSubmit}>
+					Submit
+				</button>
+			</div>
+		</div>
+	);
+}
+```

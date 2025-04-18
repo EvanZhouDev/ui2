@@ -3,11 +3,33 @@ title: Thinking in UI2
 description: Learn how the UI2 API is structured.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+UI2 is built around "intents," which can be thought of as **possible user actions**. As UI2 developers, you are responsible for defining these intents and their associated actions—as well as the UI on which these actions take place. The UI2 API will handle the rest, including prompting the AI, parsing output, and more.
 
-## What is Next?
+## The Structure of an Intent
 
-<Cards>
-	<Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-	<Card title="Learn more about Fumadocs" href="https://fumadocs.vercel.app" />
-</Cards>
+Each intent has a **name**, an optional **description**, as well as a list of **parameters**.
+
+Furthermore, each **intent** has 3 main "lifecycle" events:
+
+- `onIntent`: A function that is called when the intent is identified
+- **Cleanup**: A cleanup function that is called when the intent is no longer relevant
+- `onSubmit`: A function that is called when the user submits the textbox with the intent
+
+## Choosing Our Intents
+
+For our app, we can identify the following intents and what should happen in their lifecycle.
+
+- `addTodo`
+  - **Parameters**: Name of the todo
+  - `onIntent`: Show a preview of the new todo, to be added
+  - **Cleanup**: Remove the preview
+  - `onSubmit`: Actually add the new todo to the list
+- `completeTodo`
+  - **Parameters**: Which todo to mark as complete
+  - `onIntent`: Show a preview of the todo to be marked as complete
+  - **Cleanup**: Remove the preview
+  - `onSubmit`: Actually mark the todo as complete
+
+As you can see, all of these intents have a very similar lifecycle. As such, UI2 is designed to be compatible with a wide variety of different applications.
+
+Now, let's see how we can actually implement this in our app.

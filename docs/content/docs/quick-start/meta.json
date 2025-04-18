@@ -1,6 +1,6 @@
 {
 	"title": "Quick Start",
 	"icon": "MyIcon",
-	"pages": ["making-ui2-app", "thinking-in-ui2", "setup-ui2", "adding-intents"],
+	"pages": ["making-ui2-app", "thinking-in-ui2", "setup-ui2", "adding-intents", "whats-next"],
 	"defaultOpen": true
 }

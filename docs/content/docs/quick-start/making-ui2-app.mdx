@@ -3,11 +3,58 @@ title: Making a UI2 App
 description: Learn by doing in creating your first UI2 application.
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+import { Step, Steps } from "fumadocs-ui/components/steps";
 
-## What is Next?
+Let's start by making our first UI2 application, a **simple todo app** powered by UI2, with the following features integrated in the Natural Language Interface:
 
-<Cards>
-	<Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-	<Card title="Learn more about Fumadocs" href="https://fumadocs.vercel.app" />
-</Cards>
+- Add todos
+- Mark todos as complete
+
+Let's start by setting up our project. We'll be using Next.js as our template.
+
+<Steps>
+<Step>
+ 
+### Create a Next.js App
+
+```sh
+npx create-next-app@latest
+```
+
+Create a Next.js project.
+
+We'll be using TypeScript and Tailwind CSS.
+
+</Step>
+ 
+<Step>
+ 
+### Install UI2
+
+```sh
+npm i ui2.js
+```
+
+</Step>
+
+<Step>
+ 
+### Prepare the Files
+
+Put the following code in your `page.jsx` or `page.tsx`:
+
+```jsx
+"use client";
+import { useUI2 } from "ui2.js";
+
+export default function Page() {
+	return (
+		<div>
+			<h1>Hello UI2!</h1>
+		</div>
+	);
+}
+```
+
+</Step>
+</Steps>
