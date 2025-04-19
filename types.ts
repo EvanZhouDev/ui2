@@ -21,7 +21,13 @@ export type UI2CreatorConfig = {
 };
 
 export type UI2Config = {
-	model: LanguageModel;
+	model:
+		| LanguageModel
+		| {
+				baseURL: string;
+				apiKey: string;
+				modelId: string;
+		  };
 } & Partial<Omit<UI2CreatorConfig, "model">>;
 
 export type ParsedIntentCall<T extends z.ZodType = z.ZodObject<any>> = {
