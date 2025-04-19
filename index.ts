@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { UI2Config, UI2CreatorConfig } from "./types";
 import IntentCreator from "./src/intentCreator";
 
-let useUI2 = (config: UI2Config) => {
+export let useUI2 = (config: UI2Config) => {
 	// Default configuration values
 	const defaultConfig: Omit<UI2CreatorConfig, "model"> = {
 		systemPrompt: "",
@@ -10,7 +10,7 @@ let useUI2 = (config: UI2Config) => {
 		debounceDelay: 300,
 		onIntent: () => {},
 		onSubmitStart: () => {
-			setInputVal("")
+			setInputVal("");
 		},
 		onSubmitComplete: () => {},
 	};
@@ -58,5 +58,3 @@ let useUI2 = (config: UI2Config) => {
 
 	return instanceRef.current;
 };
-
-export default useUI2;
