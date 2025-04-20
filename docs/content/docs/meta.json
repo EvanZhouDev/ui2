@@ -1,11 +1,12 @@
 {
 	"title": "Quick Start",
-	"icon": "MyIcon",
 	"pages": [
 		"---Introduction---",
 		"what-is-ui2",
 		"quick-start",
-		"---API References---"
-	],
-	"defaultOpen": true
+		"---API Reference---",
+		"api-reference",
+		"useUI2",
+		"addIntent"
+	]
 }
