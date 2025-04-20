@@ -49,7 +49,6 @@ export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 		input?: string
 	) => void | CleanupFunction;
 	onSubmit: (intentCall: IntentCall<T>, input?: string) => void;
-	ui?: (parameters: z.infer<T> & { id: string }, input?: string) => JSX.Element;
 };
 
 export type Intents = {
