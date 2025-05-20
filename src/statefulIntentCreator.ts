@@ -67,7 +67,7 @@ export class StatefulIntentCreator extends IntentCreator {
 					this.setIsLoading(false);
 				}
 			}
-		}, this.config.debounceDelay);
+		}, this.config.debounceDelay ?? 300);
 	}
 
 	identifyIntent = async (
@@ -76,7 +76,7 @@ export class StatefulIntentCreator extends IntentCreator {
 	): Promise<IntentCall[]> => {
 		try {
 			const identifiedIntents = await super.identifyIntent(text, config);
-			if (identifiedIntents.length != 0 && text.trim() != "") {
+			if (identifiedIntents.length === 0 && text.trim() != "") {
 				// If no intents identified and nonblank text, return the other intent
 				const otherIntent: IntentCall = {
 					name: "other",
@@ -107,6 +107,7 @@ export class StatefulIntentCreator extends IntentCreator {
 
 	onSubmit = async () => {
 		const currentInputValue = this.inputValue;
+		this.config.onSubmitStart?.(currentInputValue);
 		if (this.inputDebounceHandler) {
 			// Cancel pending debounce calls (directly start new process now)
 			this.inputDebounceHandler.clear();
