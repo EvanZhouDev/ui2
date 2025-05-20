@@ -225,6 +225,8 @@ ${text}`;
 		this.intents[intentName] = intent;
 		return this;
 	}
+
+	// TODO: Add method to supply the "other" intent
 }
 
 const defaultConfig: Omit<IntentCreatorConfig, "model"> = {
