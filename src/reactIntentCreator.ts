@@ -35,7 +35,11 @@ export class ReactIntentCreator extends IntentCreator {
 	inputDebounceHandler: DebouncedFunction<(text: string) => Promise<void>>;
 	private activeIntentCalls: IntentCall<any>[] = [];
 	public intents: { [key: string]: ReactIntent<any> } = {};
-	private lastIdentifiedInput: string | null = null; // ADDED: Tracks the input for which activeIntentCalls is valid
+	private lastIdentifiedInput: string | null = null;
+
+	// Track the currently active intent identification promise and its input
+	private currentIdentificationPromise: Promise<IntentCall[]> | null = null;
+	private currentIdentificationInput: string | null = null;
 
 	constructor(
 		public config: ReactIntentCreatorConfig,
@@ -53,38 +57,76 @@ export class ReactIntentCreator extends IntentCreator {
 		super(intentCreatorConfig as IntentCreatorConfig);
 		this.inputDebounceHandler = debounce(
 			async (text: string) => {
+				// If an identification for this exact text is already running (e.g., from onSubmit or another debounce),
+				// and it's the one tracked by currentIdentificationPromise, don't start a new one.
+				if (
+					this.isLoading &&
+					this.currentIdentificationInput === text &&
+					this.currentIdentificationPromise
+				) {
+					console.log(
+						"Debounce: Identification for this text already in progress. Skipping."
+					);
+					// Optionally, could await this.currentIdentificationPromise here if the debouncer
+					// should also update based on its result, but for now, just skipping is simpler.
+					return;
+				}
+
+				const debouncePromise = this.identifyIntent(text, {
+					currentIntents: [...this.activeIntentCalls], // Pass a copy for safety
+				});
+				this.currentIdentificationPromise = debouncePromise;
+				this.currentIdentificationInput = text;
+				this.setIsLoading(true);
+
 				try {
-					this.setIsLoading(true);
-					// This call will update this.activeIntentCalls via the overridden identifyIntent
-					await this.identifyIntent(text, {
-						currentIntents: this.activeIntentCalls, // Pass current active for cleanup
-					});
-					// If identifyIntent was successful, this.activeIntentCalls is now for 'text'.
-					this.lastIdentifiedInput = text;
+					await debouncePromise;
+					// identifyIntent (the override) has updated this.activeIntentCalls.
+					// Only update lastIdentifiedInput if this promise is still the "current" one for this input.
+					// This guards against race conditions if another call (e.g., onSubmit) started for the same input.
+					if (this.currentIdentificationPromise === debouncePromise) {
+						this.lastIdentifiedInput = text;
+					}
 				} catch (error) {
-					console.error("Error during debounced intent identification:", error);
-					// On error, identifyIntent itself will set lastIdentifiedInput to null.
+					console.error(
+						"Error during debounced intent identification:",
+						error
+					);
+					if (this.currentIdentificationPromise === debouncePromise) {
+						this.lastIdentifiedInput = null; // Invalidate cache for this input
+					}
 				} finally {
-					this.setIsLoading(false);
+					// Only clear the promise and loading state if this debounced call's promise
+					// is still the one being tracked.
+					if (this.currentIdentificationPromise === debouncePromise) {
+						this.currentIdentificationPromise = null;
+						this.currentIdentificationInput = null;
+						this.setIsLoading(false);
+					}
 				}
 			},
 			this.config.debounceDelay ?? 300
 		);
 	}
 
-	identifyIntent = async (text: string, config: IdentifyIntentConfig) => {
-		// Callers (debounced function or onSubmit) are responsible for setIsLoading.
+	// Override to ensure this.activeIntentCalls is updated
+	identifyIntent = async (
+		text: string,
+		config: IdentifyIntentConfig
+	): Promise<IntentCall[]> => {
 		try {
+			// Use config.currentIntents directly as super.identifyIntent expects it.
+			// The caller (debounce or onSubmit) should pass the correct currentIntents.
 			const identifiedIntents = await super.identifyIntent(text, config);
-			this.activeIntentCalls = identifiedIntents; // Update active calls with the new result
-			console.log("ReactIntentCreator.identifyIntent updated activeIntentCalls:", this.activeIntentCalls);
-			// The caller (debounce handler or onSubmit) will set lastIdentifiedInput upon successful completion of *their* operation.
+			this.activeIntentCalls = identifiedIntents; // Update shared state
 			return identifiedIntents;
 		} catch (e) {
-			console.error("Error in super.identifyIntent, called from ReactIntentCreator.identifyIntent:", e);
+			console.error(
+				"Error in super.identifyIntent (called from ReactIntentCreator):",
+				e
+			);
 			this.activeIntentCalls = []; // Clear active intents on error
-			this.lastIdentifiedInput = null; // Invalidate last identified input on error
-			throw e;
+			throw e; // Re-throw for the caller to handle
 		}
 	};
 
@@ -93,8 +135,10 @@ export class ReactIntentCreator extends IntentCreator {
 		if (this.inputDebounceHandler) {
 			this.inputDebounceHandler.clear();
 		}
-		// Input has changed, so any previous identification is now stale for the onSubmit optimization.
+		// Input has changed, so any previous identification cache is stale.
 		this.lastIdentifiedInput = null;
+		// We don't clear currentIdentificationPromise here, as onSubmit might want to await it
+		// if the user submits the input that promise is for.
 		this.inputDebounceHandler(text);
 	};
 
@@ -103,57 +147,115 @@ export class ReactIntentCreator extends IntentCreator {
 		this.config.onSubmitStart?.(currentInputValue);
 
 		if (this.inputDebounceHandler) {
-			this.inputDebounceHandler.clear(); // Cancel any pending debounced calls
+			this.inputDebounceHandler.clear(); // Cancel any pending scheduled debounced calls
 		}
 
 		if (currentInputValue.trim() === "") {
 			this.activeIntentCalls = [];
-			this.lastIdentifiedInput = null; // Reset
+			this.lastIdentifiedInput = null;
 			this.config.onSubmitComplete?.(currentInputValue);
-			this.setIsLoading(false); // Ensure loading is false on early return
+			this.setIsLoading(false);
 			return;
 		}
 
 		let intentsToProcess: IntentCall[] = [];
 
-		// Check if the current input value was the last one successfully identified
-		// and activeIntentCalls is populated (meaning the debounced call likely completed for this input)
-		if (this.lastIdentifiedInput === currentInputValue && this.activeIntentCalls.length > 0) {
-			console.log("onSubmit: Using previously identified intents for:", currentInputValue);
-			intentsToProcess = [...this.activeIntentCalls]; // Use a copy
-			// No setIsLoading here, as the operation was already done by the debounced call.
-		} else {
-			console.log("onSubmit: Re-identifying intents for:", currentInputValue);
+		// Case 1: An identification for the current input is ALREADY running.
+		if (
+			this.isLoading &&
+			this.currentIdentificationPromise &&
+			this.currentIdentificationInput === currentInputValue
+		) {
+			console.log(
+				"onSubmit: Awaiting in-progress identification for:",
+				currentInputValue
+			);
+			// isLoading is already true, managed by the original caller of currentIdentificationPromise
 			try {
-				this.setIsLoading(true);
-				// Perform new identification. identifyIntent updates this.activeIntentCalls.
-				intentsToProcess = await this.identifyIntent(currentInputValue, {
-					currentIntents: this.activeIntentCalls, // Pass current for cleanup logic
-				});
-				// If successful, this.activeIntentCalls is now for currentInputValue
-				this.lastIdentifiedInput = currentInputValue;
+				intentsToProcess = await this.currentIdentificationPromise;
+				// The promise, when resolved, means identifyIntent updated this.activeIntentCalls.
+				this.lastIdentifiedInput = currentInputValue; // Cache is now valid for this input.
 			} catch (error) {
-				console.error("Error during onSubmit intent identification:", error);
-				intentsToProcess = []; // Ensure empty on error
-				// identifyIntent would have set lastIdentifiedInput to null on error.
+				console.error(
+					"Error awaiting in-progress identification during submit:",
+					error
+				);
+				intentsToProcess = [];
+				this.lastIdentifiedInput = null;
+			}
+			// The original caller of currentIdentificationPromise is responsible for its cleanup
+			// (nullifying it and setting isLoading to false).
+		}
+		// Case 2: Not currently loading (or loading for different input), but cache is valid.
+		else if (
+			this.lastIdentifiedInput === currentInputValue &&
+			this.activeIntentCalls.length > 0
+		) {
+			console.log(
+				"onSubmit: Using cached intents for:",
+				currentInputValue
+			);
+			intentsToProcess = [...this.activeIntentCalls]; // Use a copy
+		}
+		// Case 3: Need to start a new identification.
+		// (Not loading and cache miss, OR loading but for a different input than current).
+		else {
+			console.log(
+				"onSubmit: Starting new identification for:",
+				currentInputValue
+			);
+			const onSubmitPromise = this.identifyIntent(currentInputValue, {
+				currentIntents: [...this.activeIntentCalls], // Pass current state for cleanup logic
+			});
+			this.currentIdentificationPromise = onSubmitPromise;
+			this.currentIdentificationInput = currentInputValue;
+			this.setIsLoading(true);
+
+			try {
+				intentsToProcess = await onSubmitPromise;
+				// identifyIntent (override) updated this.activeIntentCalls.
+				this.lastIdentifiedInput = currentInputValue; // Cache is now valid.
+			} catch (error) {
+				console.error(
+					"Error during onSubmit intent identification:",
+					error
+				);
+				intentsToProcess = [];
+				this.lastIdentifiedInput = null; // Invalidate cache.
 			} finally {
-				this.setIsLoading(false);
+				// Only nullify the promise and reset loading if this onSubmit's promise
+				// is still the one being tracked.
+				if (this.currentIdentificationPromise === onSubmitPromise) {
+					this.currentIdentificationPromise = null;
+					this.currentIdentificationInput = null;
+					this.setIsLoading(false);
+				}
 			}
 		}
 
-		// 3. Process the identified intents
+		// Process the identified intents
 		for (const intentCall of intentsToProcess) {
-			if (this.intents[intentCall.name] && typeof this.intents[intentCall.name].onSubmit === 'function') {
-				this.intents[intentCall.name].onSubmit(intentCall, currentInputValue);
-			} else if (intentCall.name === 'other' && this.intents['other'] && typeof this.intents['other'].onSubmit === 'function') {
-				 this.intents['other'].onSubmit(intentCall, currentInputValue);
+			if (
+				this.intents[intentCall.name] &&
+				typeof this.intents[intentCall.name].onSubmit === "function"
+			) {
+				this.intents[intentCall.name].onSubmit(
+					intentCall,
+					currentInputValue
+				);
+			} else if (
+				intentCall.name === "other" &&
+				this.intents["other"] &&
+				typeof this.intents["other"].onSubmit === "function"
+			) {
+				this.intents["other"].onSubmit(intentCall, currentInputValue);
 			}
 		}
 
-		// 4. Call onSubmitComplete and clear states for the next cycle
+		// Call onSubmitComplete and clear states for the next cycle
 		this.config.onSubmitComplete?.(currentInputValue);
-		this.activeIntentCalls = [];
-		this.lastIdentifiedInput = null; // Reset for the next full input cycle
+		this.activeIntentCalls = []; // Reset for the next identification's cleanup context
+		this.lastIdentifiedInput = null; // Reset cache state
 	};
 
 	addIntent<T extends z.ZodType>(
