@@ -76,15 +76,9 @@ export class StatefulIntentCreator extends IntentCreator {
 	): Promise<IntentCall[]> => {
 		try {
 			const identifiedIntents = await super.identifyIntent(text, config);
-			if (identifiedIntents.length === 0 && text.trim() != "") {
-				// If no intents identified and nonblank text, return the other intent
-				const otherIntent: IntentCall = {
-					name: "other",
-					parameters: {},
-					id: crypto.randomUUID(),
-				};
-				this.activeIntentCalls = [otherIntent];
-				return [otherIntent];
+			if (text.trim() == "") {
+				this.activeIntentCalls = [];
+				return [];
 			} else {
 				this.activeIntentCalls = identifiedIntents;
 				return identifiedIntents;

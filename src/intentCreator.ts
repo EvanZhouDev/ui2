@@ -8,6 +8,7 @@ import {
 	Intents,
 	IntentCall,
 	IdentifyIntentConfig,
+	OtherIntent,
 } from "./types";
 export class IntentCreator {
 	public intents: Intents = {};
@@ -87,7 +88,6 @@ ${text}`;
 	};
 
 	async identifyIntent(text: string, config: IdentifyIntentConfig) {
-		console.log(text, config);
 		let model: LanguageModel;
 		if ("specificationVersion" in this.config.model) {
 			model = this.config.model as LanguageModel;
@@ -129,7 +129,6 @@ ${text}`;
 			schema: z.array(intentSchema),
 			output: "object",
 			mode: "json",
-			// temperature: 1,
 			prompt: this.createPrompt(text),
 			onError: (error) => {
 				console.error("Error:", error);
@@ -139,6 +138,13 @@ ${text}`;
 		const calledIntentIds = new Set<string>();
 		const remainingCurrentIntents = structuredClone(config.currentIntents);
 		const callIntents = [];
+		// Whether or not the "other" intent was already identified
+		const hasExistingOther =
+			remainingCurrentIntents.findIndex(
+				(existingIntentCall) => existingIntentCall.name === "other"
+			) != -1;
+		// Whether or not the "other" intent was identified in this call (to be decided)
+		let hasCurrentOther = false;
 
 		const processIntentCall = (intentCall: IntentCall<any>) => {
 			if (intentCall.name !== "other") {
@@ -164,20 +170,13 @@ ${text}`;
 					return intentCall;
 				}
 			} else {
-				if (this.intents["other"]) {
-					callIntents.push(() => {
-						this.intents["other"].onIntent(intentCall, text);
-						this.config.onIntent(intentCall, text);
-					});
-				} else {
-					console.warn("No `other` intent handler found.");
-				}
+				// Mark already has other as true
+				hasCurrentOther = true;
 				return intentCall;
 			}
 		};
 
 		let activeIntentCalls: IntentCall[] = [];
-
 		let processedIdx = 0;
 		for await (const partialObject of partialObjectStream) {
 			this.config.onPartialIntent(partialObject);
@@ -185,39 +184,83 @@ ${text}`;
 				// Never process the latest element, since you don't know if it is complete
 				for (; processedIdx < partialObject.length - 1; processedIdx++) {
 					const call = processIntentCall(partialObject[processedIdx]);
-					if (call.name !== "other") {
-						activeIntentCalls.push(call);
-					}
+					activeIntentCalls.push(call);
 				}
 			}
 		}
 		const finalToolCalls = await object;
-		this.config.onLoadEnd();
 		for (; processedIdx < finalToolCalls.length; processedIdx++) {
 			const call = processIntentCall(finalToolCalls[processedIdx]);
-			if (call.name !== "other") {
-				activeIntentCalls.push(call);
-			}
-		}
-		for (const curIntents of config.currentIntents) {
-			if (!calledIntentIds.has(curIntents.id)) {
-				// Clean up the unused intents
-				this.intents[curIntents.name].onCleanup(curIntents, text);
-				this.config.onCleanup(curIntents, text);
-			}
+			activeIntentCalls.push(call);
 		}
 
-		// Cache all intent calls to occur after cleanup
-		for (const callIntent of callIntents) {
-			callIntent();
+		const otherCall = {
+			name: "other",
+			parameters: {},
+			id: "",
+		};
+		// In the case there was an existing other, but now the input is blank	
+		if (hasExistingOther && text.trim() == "") {
+			if (this.intents["other"]) {
+				this.intents["other"].onCleanup?.(otherCall, text);
+			}
+		}
+		// The textbox is not blank, but no intents were called. Implied "other" added
+		else if (finalToolCalls.length === 0 && text.trim() != "") {
+			// Potential call onIntent
+			if (!hasExistingOther) {
+				if (this.intents["other"]) {
+					this.intents["other"].onIntent?.(otherCall, text);
+				}
+			}
+			activeIntentCalls.push(otherCall);
+		} else {
+			// If there was an "other" before, but there isn't now, call the cleanup
+			if (hasExistingOther) {
+				if (!hasCurrentOther) {
+					if (this.intents["other"]) {
+						this.intents["other"].onCleanup?.(otherCall, text);
+					}
+				}
+			} else {
+				for (const curIntents of config.currentIntents) {
+					if (!calledIntentIds.has(curIntents.id)) {
+						// Clean up the unused intents
+						this.intents[curIntents.name].onCleanup(curIntents, text);
+						this.config.onCleanup(curIntents, text);
+					}
+				}
+			}
+		}
+		this.config.onLoadEnd();
+
+		// If text is simply blank, still run cleanups, but don't call intents
+		if (text.trim() != "") {
+			// Cache all intent calls to occur after cleanup
+			for (const callIntent of callIntents) {
+				callIntent();
+			}
 		}
 		return activeIntentCalls;
 	}
 
 	addIntent<T extends z.ZodType>(intentName: string, intent: Intent<T>): this {
+		if (intentName === "other")
+			throw new Error(
+				"Intent name cannot be `other`. If you wish to add an `other` intent, use the `addOther` method."
+			);
 		this.intents[intentName] = intent;
 		return this;
 	}
 
-	// TODO: Add method to supply the "other" intent
+	addOther(intent: OtherIntent): this {
+		this.intents["other"] = {
+			parameters: z.object({}),
+			onCleanup: () => {},
+			onIntent: () => {},
+			description: "",
+			...intent,
+		};
+		return this;
+	}
 }

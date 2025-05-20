@@ -1,4 +1,4 @@
-import { LanguageModel, streamObject } from "ai";
+import { LanguageModel } from "ai";
 import { z } from "zod";
 
 export type IntentCreatorConfig = {
@@ -35,6 +35,12 @@ export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 	onCleanup: (intentCall: IntentCall<T>, input?: string) => void;
 };
 
+export type OtherIntent = {
+	description?: string;
+	onIntent?: (intentCall: IntentCall, input?: string) => void;
+	onCleanup?: (intentCall: IntentCall, input?: string) => void;
+};
+
 export type Intents = {
 	[key: string]: Intent<z.ZodType> & {
 		[key: string]: any;
@@ -58,6 +64,7 @@ export type StatefulIntentCreatorConfig =
 			onSubmitComplete?: (input?: string) => void;
 	  };
 
-export type StatefulIntent<T extends z.ZodType<any, z.ZodTypeDef, any>> = Intent<T> & {
-	onSubmit: (intentCall: IntentCall, input?: string) => void;
-};
+export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =
+	Intent<T> & {
+		onSubmit: (intentCall: IntentCall, input?: string) => void;
+	};
