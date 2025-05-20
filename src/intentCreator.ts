@@ -2,57 +2,13 @@ import { LanguageModel, streamObject } from "ai";
 import { z } from "zod";
 import { createOpenAI } from "@ai-sdk/openai";
 import zodToJsonSchema from "zod-to-json-schema";
-
-export type IntentCreatorConfig = {
-	model:
-		| LanguageModel
-		| {
-				baseURL: string;
-				apiKey: string;
-				modelId: string;
-		  };
-	systemPrompt: string;
-	context: object;
-	onPartialIntent: (partialIntents: IntentCall[]) => void;
-	onLoadStart: () => void;
-	onLoadEnd: () => void;
-	onIntent: (intentCall: IntentCall, input?: string) => void;
-	onCleanup: (intentCall: IntentCall, input?: string) => void;
-};
-
-export type UI2Config = {
-	model:
-		| LanguageModel
-		| {
-				baseURL: string;
-				apiKey: string;
-				modelId: string;
-		  };
-} & Partial<Omit<IntentCreatorConfig, "model">>;
-
-export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
-	parameters: T;
-	description: string;
-	onIntent: (intentCall: IntentCall<T>, input?: string) => void;
-	onCleanup: (intentCall: IntentCall<T>, input?: string) => void;
-};
-
-export type Intents = {
-	[key: string]: Intent<z.ZodType> & {
-		[key: string]: any;
-	};
-};
-
-export type IntentCall<T extends z.ZodType = z.ZodObject<any>> = {
-	name: string;
-	id: string;
-	parameters: z.infer<T>;
-};
-
-export type IdentifyIntentConfig = {
-	currentIntents: IntentCall[];
-};
-
+import {
+	IntentCreatorConfig,
+	Intent,
+	Intents,
+	IntentCall,
+	IdentifyIntentConfig,
+} from "./types";
 export class IntentCreator {
 	public intents: Intents = {};
 
@@ -264,74 +220,4 @@ ${text}`;
 	}
 
 	// TODO: Add method to supply the "other" intent
-	// TODO: Also add schemas back into system instructions so the model can see the descriptions
 }
-
-const defaultConfig: Omit<IntentCreatorConfig, "model"> = {
-	systemPrompt: "",
-	context: {},
-	onLoadStart: () => {},
-	onLoadEnd: () => {},
-	onIntent: () => {},
-	onCleanup: () => {},
-	onPartialIntent: () => {},
-};
-
-export const ui2 = (config: UI2Config) => {
-	return new IntentCreator({ ...defaultConfig, ...config });
-};
-
-/////
-
-let { identifyIntent } = ui2({
-	model: {
-		baseURL: "https://api.cerebras.ai/v1",
-		apiKey: "csk-w3kkcpn3v6we3me4k44fvhmfj4vxcymwvet8fkmrj5m5d5td",
-		modelId: "llama-4-scout-17b-16e-instruct",
-	},
-	onLoadStart: () => console.log("Starting processing"),
-	onLoadEnd: () => console.log("Completed processing"),
-	onIntent: (intentCall: IntentCall) =>
-		console.log("Intent (global) " + JSON.stringify(intentCall)),
-	onCleanup: (intentCall: IntentCall) =>
-		console.log("Cleaning up (global) " + JSON.stringify(intentCall)),
-})
-	.addIntent("addTodo", {
-		parameters: z.object({
-			title: z.string(),
-		}),
-		description: "Add a new todo.",
-		onIntent: (intentCall) => {
-			console.log(
-				"Intent called " + JSON.stringify(intentCall.parameters.title)
-			);
-		},
-		onCleanup: (intentCall) => {
-			console.log("Intent cleanup " + JSON.stringify(intentCall));
-		},
-	})
-	.addIntent("removeTodo", {
-		parameters: z.object({
-			title: z.string(),
-		}),
-		description: "Removes a todo.",
-		onIntent: (intentCall: IntentCall) => {
-			console.log("Intent called " + JSON.stringify(intentCall.parameters));
-		},
-		onCleanup: (intentCall: IntentCall) => {
-			console.log("Intent cleanup " + JSON.stringify(intentCall));
-		},
-	});
-
-// Based off current intents, it can help call cleanup on certain intents
-await identifyIntent("add two todos with title test", {
-	currentIntents: [
-		{
-			name: "addTodo",
-			parameters: {
-				title: "test",
-			},
-			id: "1",
-		},
-	],
-});
