@@ -1,6 +1,6 @@
 # UI2
 
-> Unified Intent Interface
+> Introducing the **Unified Intent Interface**
 
 ## What is it?
 

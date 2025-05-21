@@ -87,7 +87,7 @@ ${text}`;
 		});
 	};
 
-	async identifyIntent(text: string, config: IdentifyIntentConfig) {
+	async identifyIntent(text: string, config?: IdentifyIntentConfig) {
 		let model: LanguageModel;
 		if ("specificationVersion" in this.config.model) {
 			model = this.config.model as LanguageModel;

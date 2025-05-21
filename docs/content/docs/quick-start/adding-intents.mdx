@@ -3,265 +3,132 @@ title: Adding Intents
 description: Adding Intents to your UI2 app
 ---
 
-Now, it's time to add intents to our app.
+import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Let's start with the `addTodo` intent. Remember this is what we wanted it to do:
+The next step is to actually define our intents. I'll first show you the code for one such intent:
 
-- `addTodo`
-  - **Parameters**: Name of the todo
-  - `onIntent`: Show a preview of the new todo, to be added
-  - **Cleanup**: Remove the preview
-  - `onSubmit`: Actually add the new todo to the list
-
-## Basic Intent Setup
-
-In order to add an intent, we simply call `.addIntent()` on the `useUI2()` hook, with the name of the intent, and the parameters.
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a todo app.",
-	context: todos,
-}).addIntent("addTodo", {
-	// config here...
-});
-```
-
-We'll start by defining the intent description, and the parameters, like such:
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a todo app.",
-	context: todos,
-}).addIntent("addTodo", {
-	description: "Add a todo",
-	parameters: z.object({
-		name: z.string(),
-	}),
-});
-```
-
-Ensure that you have `zod` installed and `import { z } from "zod";` at the top of your file.
-
-## `onIntent` Setup
-
-Next, we will define the `onIntent` callback. This function should return the cleanup function, much like `useEffect`.
-
-In the main `onIntent`, we'll create a new reminder, with the `preview` status set to `true`. In this way, the user can see a live preview of the new todo, before they actually add it to the list.
-
-In the cleanup—the function that is called when the intent is no longer detected—we'll just remove that todo.
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a todo app.",
-	context: todos,
-}).addIntent("addTodo", {
-	description: "Add a todo",
-	parameters: z.object({
-		name: z.string(),
-	}),
-	onIntent: ({ parameters, id }) => {
-		setTodos((prev) => [
-			...prev,
-			{
-				id,
-				name: parameters.name,
-				completed: false,
-				preview: true,
-			},
-		]);
-		return () => setTodos((prev) => prev.filter((x) => x.id !== id));
-	},
-});
-```
-
-Note that all intent calls come with a `id` field. This helps internally track which intent calls are going on, but they can also be used as a way to identify specific actions that are being taken, such as the todos created in this case.
-
-## `onSubmit` Setup
-
-Finally, we will define the `onSubmit` callback. In this function, we'll just change the preview status of the todo to `false`, essentially adding it.
-
-Here's our final code so far:
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a todo app.",
-	context: todos,
-}).addIntent("addTodo", {
-	description: "Add a todo",
-	parameters: z.object({
-		name: z.string(),
-	}),
-	onIntent: ({ parameters, id }) => {
-		setTodos((prev) => [
-			...prev,
-			{
-				id,
-				name: parameters.name,
-				completed: false,
-				preview: true,
-			},
-		]);
-		return () => setTodos((prev) => prev.filter((x) => x.id !== id));
-	},
-	onSubmit: ({ id }) =>
-		setTodos((prev) =>
-			prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
-		),
-});
-```
-
-## Creating `completeTodo`
-
-Now, we can similarly create `completeTodo` like such, added below our `addTodo` intent:
-
-```jsx
-.addIntent("completeTodo", {
-			description: "complete a todo",
-			parameters: z.object({
-				id: z.string(),
-			}),
-			onIntent: ({ parameters }) => {
-				setTodos((prev) =>
-					prev.map((x) =>
-						x.id === parameters.id
-							? { ...x, preview: true, completed: true }
-							: x
-					)
-				);
-				return () =>
-					setTodos((prev) =>
-						prev.map((x) =>
-							x.id === parameters.id
-								? { ...x, preview: false, completed: false }
-								: x
-						)
-					);
-			},
-			onSubmit: ({ parameters }) =>
-				setTodos((prev) =>
-					prev.map((x) =>
-						x.id === parameters.id
-							? { ...x, preview: false, completed: true }
-							: x
-					)
-				),
-		});
-```
-
-Note that this is very similar to our `addTodo` intent, and follows a similar lifecycle.
-
-The one thing to pay attention to is the fact that we are receiving the todo ID from the parameters. The LLM knows these IDs since we passed it in as `context`.
-
-Note that `parameters.id` is _not_ the same thing as the intent ID, which is also passed in the `onIntent` and `onSubmit` callbacks.
-
-## Final Code
-
-This is your final UI2 code for our todo app.
-
-```jsx
-"use client";
-import { useUI2 } from "ui2.js";
-import { createCerebras } from "@ai-sdk/cerebras";
-import { useState } from "react";
+```ts
+import { createUI2 } from "ui2-kit";
+import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
 
-export default function Page() {
-	const cerebras = createCerebras({
-		apiKey: "YOUR_API_KEY",
-	});
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+}).addIntent("sum", {
+	parameters: z.object({
+		a: z.number(),
+		b: z.number(),
+	}),
+	description: "Add two numbers together",
+	onIntent: (intentCall) => {
+		console.log(
+			`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+				intentCall.parameters.a + intentCall.parameters.b
+			}`
+		);
+	},
+	onCleanup: (intentCall) => {
+		console.log("Intent cleaned up:", intentCall);
+	},
+});
+```
 
-	const [todos, setTodos] = useState<
-		{
-			id: string;
-			name: string;
-			completed: boolean;
-			preview: boolean;
-		}[]
-	>([]);
+Let's walk through what's happening.
 
-	let { inputValue, onInputChange, onSubmit } = useUI2({
-		model: cerebras("llama-4-scout-17b-16e-instruct"),
-		systemPrompt: "This is a todo app.",
-		context: todos,
+<Steps>
+<Step>
+ 
+### Name Your Intent
+
+The first parameter of `.addIntent("sum", {})` is the name of your intent. Keep it short and ideally following the standard variable naming conventions (for example, no spaces)—However, the more descriptive it is, the better.
+
+</Step>
+<Step>
+ 
+### Describe Your Intent
+
+Next, if you feel like your name isn't clear enough, you can provide explicit descriptions. These are passed to the AI so it knows how or when to identify your Intent.
+
+</Step>
+ 
+<Step>
+ 
+### Give Parameters
+
+The parameters are defined using [Zod](https://zod.dev/).
+
+They must be contained in a `z.object`, but anything inside is up to you. You can even use `.describe("")` to describe your types to the AI.
+
+Powered by Structured Output, it is guarenteed the AI's output will match your schema.
+
+However, to prevent confusion, it's still best to keep the schema relatively simple.
+
+</Step>
+
+<Step>
+ 
+### Define Your Event Listeners
+
+For both `onIntent` and `onCleanup`, they take a callback with two parameters: `intentCall` and `input`.
+
+`intentCall` is an object consisting of the `name`, `id`, and `parameters` of that particular intent call.
+
+- `name` is simply the name of whatever intent was called. This is redundant, but there for continuity.
+- `id` is a UUID identifier to keep track of that particular intent identified. It can be used to prevent duplicate calls to functions, but it's more relevant with frontend.
+- `parameters` is a object in the same schema that you specified. It's fully type annotated, so you get typesafety and IDE autocomplete for its properties.
+
+</Step>
+</Steps>
+
+It might seem like a lot of code to write, but it's easy to do so—it's simply describing behavior.
+
+## Another Intent
+
+The neat part about UI2 is that to include another intent, you simply chain another `.addIntent` to the end of your existing code. It scales simply and easily.
+
+Now, based on this, try to implement a `square` intent which takes a parameter to square.
+
+Here's the final code with both intents:
+
+```ts
+import { createUI2 } from "ui2-kit";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+})
+	.addIntent("sum", {
+		parameters: z.object({
+			a: z.number(),
+			b: z.number(),
+		}),
+		description: "Add two numbers together",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+					intentCall.parameters.a + intentCall.parameters.b
+				}`
+			);
+		},
+		onCleanup: (intentCall) => {
+			console.log("Intent cleaned up:", intentCall);
+		},
 	})
-		.addIntent("addTodo", {
-			description: "Add a todo",
-			parameters: z.object({
-				name: z.string(),
-			}),
-			onIntent: ({ parameters, id }) => {
-				setTodos((prev) => [
-					...prev,
-					{
-						id,
-						name: parameters.name,
-						completed: false,
-						preview: true,
-					},
-				]);
-				return () => setTodos((prev) => prev.filter((x) => x.id !== id));
-			},
-			onSubmit: ({ id }) =>
-				setTodos((prev) =>
-					prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
-				),
-		})
-		.addIntent("completeTodo", {
-			description: "complete a todo",
-			parameters: z.object({
-				id: z.string(),
-			}),
-			onIntent: ({ parameters }) => {
-				setTodos((prev) =>
-					prev.map((x) =>
-						x.id === parameters.id
-							? { ...x, preview: true, completed: true }
-							: x
-					)
-				);
-				return () =>
-					setTodos((prev) =>
-						prev.map((x) =>
-							x.id === parameters.id
-								? { ...x, preview: false, completed: false }
-								: x
-						)
-					);
-			},
-			onSubmit: ({ parameters }) =>
-				setTodos((prev) =>
-					prev.map((x) =>
-						x.id === parameters.id
-							? { ...x, preview: false, completed: true }
-							: x
-					)
-				),
-		});
-
-	return (
-		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
-			{todos.length
-				? todos.map((x) => (
-						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
-							{x.name} - {x.completed ? "Completed" : "Todo"}
-						</div>
-				  ))
-				: "No todos"}
-			<div className="flex flex-row gap-2">
-				<input
-					className="p-1 outline"
-					value={inputValue}
-					onChange={onInputChange}
-				/>
-				<button className="p-1 outline" onClick={onSubmit}>
-					Submit
-				</button>
-			</div>
-		</div>
-	);
-}
+	.addIntent("square", {
+		parameters: z.object({
+			a: z.number(),
+		}),
+		description: "Squares a number",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a}^2 = ${
+					intentCall.parameters.a * intentCall.parameters.a
+				}`
+			);
+		},
+		onCleanup: (intentCall) => {
+			console.log("Intent cleaned up:", intentCall);
+		},
+	});
 ```
