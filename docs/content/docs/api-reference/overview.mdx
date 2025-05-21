@@ -1,4 +1,73 @@
 ---
-title: UI2 API Reference
+title: UI2 API Overview
 description: Learn the UI2 API from inside out
 ---
+
+Welcome to the UI2 API Documentation.
+
+This documentation will guide you through not only the parameters for every single method and function available in UI2, but also _how it works_. By the end of this documentation, you'll also understand how to build your own integrations into UI2 and use intent nearly everywhere.
+
+## The Structure of UI2
+
+First, we have to have a quick overview of how UI2 works.
+
+### The `IntentCreator` Class
+
+At it's core, all UI2 implementations are based off the `IntentCreator` class.
+
+This class helps manage all intents on your application, and also contains the logic to add intents and identify intents.
+
+### The UI2 Builder Function
+
+However, since it can be tedious to directly operate on a class ocassionally, UI2 is exposed to the user with a function builder interface.
+
+For example, here's what it would look like with `IntentCreator`:
+
+```ts
+let ic = new IntentCreator();
+ic.addIntent("intent1", {
+	// config...
+});
+ic.addIntent("intent2", {
+	// config...
+});
+ic.addIntent("intent3", {
+	// config...
+});
+ic.identifyIntent("some intent");
+```
+
+But with the function builder syntax, it would look more like this:
+
+```ts
+let { identifyIntent } = createUI2()
+    .addIntent("intent1", {
+        // config...
+    })
+    .addIntent("intent2", {
+        // config...
+    })
+    .addIntent("intent3", {
+        // config...
+    })
+
+identifyIntent("some intent");
+```
+
+As you can see, you no longer need to have a reference to IntentCreator, but can rather build continuously on one function.
+
+### Extending UI2
+
+But due to how `IntentCreator` is also available directly from the API, UI2 can easily be extended.
+
+That is, you can extend the `IntentCreator` class to integrate extra capabilities, and even create new Builder Functions to use.
+
+For example, the React hook uses a custom `StatefulIntentCreator` which is uses this pattern.
+
+## Documentation Structure
+
+We'll first go through the `IntentCreator` class, and how it works.
+
+Then, we'll discuss `createUI2` and it's methods.
+
+Finally, we will talk more about how to use the core extensions of `StatefulIntentCreator` and the React Hook.

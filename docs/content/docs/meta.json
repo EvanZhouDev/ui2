@@ -7,9 +7,11 @@
 		"quick-start",
 		"react-quick-start",
 		"---Advanced Usage---",
+		"advanced-usage-overview",
 		"examples",
 		"---API Reference---",
 		"api-reference",
+		"statefulIntentCreator",
 		"react-hook-reference"
 	]
 }

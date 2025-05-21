@@ -3,8 +3,11 @@
 	"icon": "MyIcon",
 	"pages": [
 		"overview",
+		"types",
 		"intentCreator",
 		"createUI2",
+		"addIntent",
+		"addOther",
 		"statefulIntentCreator"
 	],
 	"defaultOpen": true
