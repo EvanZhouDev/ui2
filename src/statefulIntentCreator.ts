@@ -2,6 +2,7 @@ import {
 	IdentifyIntentConfig,
 	IntentCreatorConfig,
 	IntentCall,
+	IntentPartialOptional,
 	StatefulIntent,
 	StatefulIntentCreatorConfig,
 } from "./types";
@@ -187,9 +188,15 @@ export class StatefulIntentCreator extends IntentCreator {
 
 	addIntent<T extends z.ZodType>(
 		intentName: string,
-		intent: StatefulIntent<T>
+		intent: IntentPartialOptional<T>
 	): this {
-		this.intents[intentName] = intent;
+		let completeIntent: StatefulIntent<T> = {
+			onCleanup: () => {},
+			onSubmit: () => {},
+			description: "",
+			...intent,
+		}
+		this.intents[intentName] = completeIntent;
 		return this;
 	}
 }

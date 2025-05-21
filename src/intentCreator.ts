@@ -5,6 +5,7 @@ import zodToJsonSchema from "zod-to-json-schema";
 import {
 	IntentCreatorConfig,
 	Intent,
+	IntentPartialOptional,
 	Intents,
 	IntentCall,
 	IdentifyIntentConfig,
@@ -244,12 +245,17 @@ ${text}`;
 		return activeIntentCalls;
 	}
 
-	addIntent<T extends z.ZodType>(intentName: string, intent: Intent<T>): this {
+	addIntent<T extends z.ZodType>(intentName: string, intent: IntentPartialOptional<T>): this {
 		if (intentName === "other")
 			throw new Error(
 				"Intent name cannot be `other`. If you wish to add an `other` intent, use the `addOther` method."
 			);
-		this.intents[intentName] = intent;
+		let completeIntent: Intent<T> = {
+			onCleanup: () => {},
+			description: "",
+			...intent,
+		}
+		this.intents[intentName] = completeIntent;
 		return this;
 	}
 

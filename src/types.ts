@@ -28,6 +28,13 @@ export type UI2Config = {
 		  };
 } & Partial<Omit<IntentCreatorConfig, "model">>;
 
+export type IntentPartialOptional<T extends z.ZodType = z.ZodObject<any>> = {
+	parameters: T;
+	onIntent: (intentCall: IntentCall<T>, input?: string) => void;
+	description?: string;
+	onCleanup?: (intentCall: IntentCall<T>, input?: string) => void;
+}
+
 export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
 	description: string;
