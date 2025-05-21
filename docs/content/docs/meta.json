@@ -6,9 +6,10 @@
 		"what-is-ui2",
 		"quick-start",
 		"react-quick-start",
+		"---Advanced Usage---",
+		"examples",
 		"---API Reference---",
 		"api-reference",
-		"useUI2",
-		"addIntent"
+		"react-hook-reference"
 	]
 }

@@ -1,0 +1,12 @@
+{
+	"title": "Examples",
+	"icon": "MyIcon",
+	"pages": [
+		"using-context",
+		"using-id",
+		"other-intent",
+		"intent-creator-class",
+		"extending-ui2"
+	],
+	"defaultOpen": true
+}
