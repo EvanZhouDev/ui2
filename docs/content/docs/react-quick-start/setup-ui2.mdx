@@ -9,7 +9,7 @@ Update your `page.tsx` with a few changes:
 
 ```jsx
 "use client";
-import { useUI2 } from "ui2.js";
+import { useUI2 } from "ui2-kit";
 import { useState } from "react";
 
 export default function Page() {
@@ -40,7 +40,7 @@ export default function Page() {
 }
 ```
 
-We're also including a `preview` field and UI state to each reminder. It'll make more sense when we start making intents.
+We're also including a `preview` field and UI state to each reminder. It'll make more sense when we start making intents and previewing intent actions.
 
 Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. The Here's what it should look like:
 
@@ -61,24 +61,26 @@ Let's update our input and submit button to use these returned variables:
 </div>
 ```
 
-Next, before we configure our `useUI2`, we need to choose a model to run UI2 with. It is highly recommended to use the [Cerebras Instant Inference API](https://www.cerebras.ai/).
+Next, in the configuration object for `useUI2`, we need to put a `model`. These are available through the Vercel AI SDK.
 
-UI2 supports usage with the [Vercel AI SDK](https://sdk.vercel.ai/providers/ai-sdk-providers), so we can simply set up a model as such:
+It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/) models for their speed. Learn how to set it up on the [Vercel AI SDK Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras). However, you can choose any provider you want.
+
+After you have your model set up, it should look something like this:
 
 ```jsx
-import { createCerebras } from "@ai-sdk/cerebras";
+import { cerebras } from "@ai-sdk/cerebras";
 
-const cerebras = createCerebras({
-	apiKey: "YOUR_API_KEY",
+let { inputValue, onInputChange, onSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
 });
 ```
 
-Now, we can update our `useUI2` call to use the Cerebras model and also provide a System Prompt to tell the model what app we're making:
+Let's also provide a System Prompt to tell the model what app we're making:
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
 	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a reminders app.",
+	systemPrompt: "This is a todo app.",
 });
 ```
 
@@ -92,19 +94,17 @@ let { inputValue, onInputChange, onSubmit } = useUI2({
 });
 ```
 
-Altogether, your file should look like this:
+Context is an interesting part of UI2, as not only is intent detection now based off just the single text you are typing in, it's also based on everything in your app.
+
+Altogether, your file should look like this now:
 
 ```jsx
 "use client";
-import { useUI2 } from "ui2.js";
-import { createCerebras } from "@ai-sdk/cerebras";
+import { useUI2 } from "ui2-kit";
+import { cerebras } from "@ai-sdk/cerebras";
 import { useState } from "react";
 
 export default function Page() {
-	const cerebras = createCerebras({
-		apiKey: "YOUR_API_KEY",
-	});
-
 	const [todos, setTodos] = useState<
 		{
 			id: string;
@@ -117,7 +117,6 @@ export default function Page() {
 	let { inputValue, onInputChange, onSubmit } = useUI2({
 		model: cerebras("llama-4-scout-17b-16e-instruct"),
 		systemPrompt: "This is a todo app.",
-		debounceDelay: 300,
 		context: todos,
 	});
 

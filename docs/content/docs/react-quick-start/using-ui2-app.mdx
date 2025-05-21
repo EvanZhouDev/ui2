@@ -1,0 +1,47 @@
+---
+title: Using Your UI2 App
+description: The features to try
+---
+
+Now that you've finished your app, you can actually try using it.
+
+The great part about UI2 is that due to the powerful LLM powered intent framework, there is much more to UI2 than what's exposed on the surface.
+
+Here are some basic things to try out:
+
+- Create a reminder with a natural language statement
+- Complete reminders with natural language statements
+
+And some more complicated things that you can do:
+
+- Create multiple reminders with natural language statements
+- Complete all your reminders
+- Combination of creating and completing reminders
+
+## Notes on AI Usage
+
+There are a few things that you have to be aware of while using UI2. While UI2 does not use that many tokens per request, it does tend to use many requests.
+
+While typically its hard to hit rate limits when you are the one using UI2, you may hit rate limits during development.
+
+Something that you can change is the `debounceDelay` which increases the cooldown between consecutive AI calls. Similarly, if you ahve the budget, you can also decrease this delay to make UI2 feel more snappy.
+
+It's best to adapt this delay to your audience. For example:
+
+- **Shorter Delay**: If your app requires very fast feedback or typically consists of fast typers
+- **Longer Delay**: If immediate preview isn't as important or your app typically has slower typers
+
+You can change this property by passing it into the `useUI2` config, as such:
+
+```ts
+let { inputValue, onInputChange, onSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	debounceDelay: 500, // In ms
+	context: todos,
+});
+```
+
+Note that the default delay is 300ms.
+
+Note that this delay has to be combined with AI latency, so the real debounce will _feel_ like more than 300ms.

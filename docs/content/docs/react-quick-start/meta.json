@@ -1,6 +1,14 @@
 {
 	"title": "React Quick Start",
 	"icon": "MyIcon",
-	"pages": ["making-ui2-app", "thinking-in-ui2", "setup-ui2", "adding-intents", "whats-next"],
+	"pages": [
+		"overview",
+		"making-ui2-app",
+		"thinking-in-ui2",
+		"setup-ui2",
+		"adding-intents",
+		"using-ui2-app",
+		"whats-next"
+	],
 	"defaultOpen": false
 }

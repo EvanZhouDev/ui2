@@ -5,7 +5,8 @@ description: Learn by doing in creating your first UI2 application.
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-Let's start by making our first UI2 application, a **simple todo app** powered by UI2, with the following features integrated in the Natural Language Interface:
+Let's start by making our first UI2 application.
+As a reminder, we'll be making a **simple todo app** powered by UI2, with the following features integrated in the Natural Language Interface:
 
 - Add todos
 - Mark todos as complete
@@ -32,7 +33,7 @@ We'll be using TypeScript and Tailwind CSS.
 ### Install UI2
 
 ```sh
-npm i ui2.js
+npm i ui2-kit
 ```
 
 </Step>
@@ -41,11 +42,11 @@ npm i ui2.js
  
 ### Prepare the Files
 
-Put the following code in your `page.jsx` or `page.tsx`:
+Put the following code in your `page.tsx`:
 
 ```jsx
 "use client";
-import { useUI2 } from "ui2.js";
+import { useUI2 } from "ui2-kit";
 
 export default function Page() {
 	return (
