@@ -1,0 +1,41 @@
+---
+title: identifyIntent
+description: Triggering intent identification
+---
+
+`identifyIntent` is the main function used to trigger intent identification.
+
+
+## `identifyIntent` Parameters
+
+```ts
+async identifyIntent(text: string, config?: IdentifyIntentConfig): void
+```
+
+This takes two parameters: The current `text` to identify as well as an optional configuration object.
+
+* `text`: A string for the "input" to intent identification
+* `config`: Takes one property, which is the `currentIntents`, an array of `IntentCalls[]`.
+
+## `identifyIntent` Return Value
+
+There are multiple ways to process intents already:
+
+* Use the `onIntent` and `onCleanup` event listeners on `addIntent` (Recommended)
+* You can also use the `onInten` and `onCleanup` event listeners on `createUI2` itself
+
+The final way to do it is to use `identifyIntent`'s return value, which is a list of `IntentCalls[]`.
+
+## Using `currentIntents`
+
+Without knowing what intents are "currently active," there is no way to know what to clean up.
+
+In other words, without passing any `currentIntents` with the Stateless UI2 API, there will never be any `onCleanup` called.
+
+The `currentIntents` list should tell UI2 what intents are currently active (typically as the output of a previous `identifyIntent` call), before the current `identifyIntent` was even called.
+
+Then, if there are any changes from the initial list, further `onIntent` and `onCleanup` can be called.
+
+## Summary
+
+This is more so an internal API, so wrappers like `StatefulIntentCreator` don't require this anymore, and instead have other "entrypoints" such as state updates.

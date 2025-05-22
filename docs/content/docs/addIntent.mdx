@@ -31,7 +31,7 @@ Then, you can pass in an object to `addIntent` with the following properties:
 | :------------ | :----------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- |
 | `parameters`  | `z.ZodType` (default: `z.ZodObject<any>`)                                | Zod schema defining the parameters for this intent. Learn more [below](#parameters-option) |
 | `description` | `string`                                                                 | Description of what the intent does.                                                       |
-| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void \| CleanupFunction` | Called when this intent is identified. Learn more [below](#onintent-and-onsubmit-options).  |
+| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified. Learn more [below](#onintent-and-onsubmit-options).  |
 | `onSubmit`    | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is submitted. Learn more [below](#onintent-and-onsubmit-options).   |
 
 ### `parameters` Option

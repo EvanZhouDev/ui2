@@ -63,7 +63,7 @@ You can pass in an object to `useUI2` with the following properties:
 | `systemPrompt`     | `string`                                                                   | System prompt to the AI                                                                                                                     |
 | `context`          | `object`                                                                   | Any context you want to give to the AI, that is updated per request (i.e. React state). Learn more [below](#context-option)                 |
 | `debounceDelay`    | `number`                                                                   | In milliseconds, how much to debounce the input box by                                                                                      |
-| `onIntent`         | `(input?: string) => void \| CleanupFunction`                              | Called when any intent is identified. Learn more [below](#onintent-option).                                                                 |
+| `onIntent`         | `(input?: string) => void`                              | Called when any intent is identified. Learn more [below](#onintent-option).                                                                 |
 | `onSubmitStart`    | `(input?: string) => void`                                                 | Called when the submission process starts. By default clears the input box Learn more [below](#onsubmitstart-and-onsubmitcomplete-options). |
 | `onSubmitComplete` | `(input?: string) => void`                                                 | Called when the submission process completes. Learn more [below](<(#onsubmitstart-and-onsubmitcomplete-options)>).                          |
 

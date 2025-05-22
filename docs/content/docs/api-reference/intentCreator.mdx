@@ -118,8 +118,8 @@ This takes two parameters: One for the name of the intent, and the other for int
 | :------------ | :----------------------------------------------------------------------- | :-------------------------------------------------- |
 | `parameters`  | `z.ZodType` (default: `z.ZodObject<any>`)                                | Zod schema defining the parameters for this intent. |
 | `description` | `string`                                                                 | Description of what the intent does.                |
-| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void \| CleanupFunction` | Called when this intent is identified.              |
-| `onCleanup`    | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.               |
+| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.              |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.      |
 
 These intents are later able to be identified.
 
@@ -133,12 +133,11 @@ addOther(intent: OtherIntent): this
 
 The `other` intent is unique, since it acts as a catch-all for any intent that isn't listed. It always exists even if you don't define it, but you can customize it's behavior. The configuration is very similar to `addIntent`, but it is missing various things that you cannot customize.
 
-| Value Name    | Type                                                                     | Description                                         |
-| :------------ | :----------------------------------------------------------------------- | :-------------------------------------------------- |
-| `description` | `string`                                                                 | Customize when the `other` intent can be called.                |
-| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void \| CleanupFunction` | Called when this intent is identified.              |
-| `onCleanup`    | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.               |
-
+| Value Name    | Type                                                                     | Description                                      |
+| :------------ | :----------------------------------------------------------------------- | :----------------------------------------------- |
+| `description` | `string`                                                                 | Customize when the `other` intent can be called. |
+| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.           |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.   |
 
 ## Conclusion
 

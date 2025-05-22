@@ -2,3 +2,109 @@
 title: addIntent
 description: Adding an Intent to UI2
 ---
+
+`addIntent` helps you add an intent onto the Intent Interface which you created with `createUI2`.
+
+## Designing an Intent
+
+It can be difficult to design a good intent. However, here are some tips:
+
+- **Think of an Action**: An Intent is an Action that the user can take on your page. It should be clearly defined and easily executed.
+- **Have Parameters**: The important part about UI2 is that it allows you to have parameters for your Intents. You should try to turn multiple separate intents into a single intent with multiple parameters
+
+## `addIntent` Parameters
+
+```ts
+addIntent<T extends z.ZodType>(intentName: string, intent: IntentPartialOptional<T>): this
+```
+
+This function adds an intent, to be able to later be identified.
+
+This takes two parameters: One for the name of the intent, and the other for intent options, as listed below:
+
+Note that the name of the Intent cannot be `"other"`. Besides that, duplicate names **will be overriden by the last `addIntent` call**
+
+| Value Name    | Type                                                  | Description                                         |
+| :------------ | :---------------------------------------------------- | :-------------------------------------------------- |
+| `parameters`  | `z.ZodType` (default: `z.ZodObject<any>`)             | Zod schema defining the parameters for this intent. |
+| `description` | `string`                                              | Description of what the intent does.                |
+| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.              |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is no longer detected.      |
+
+### `parameters`
+
+These parameters _must_ be a Zod `object`, and help define the "inputs" to your intent.
+
+Generally, it is recommended to keep these parameters simple. However, various advanced type features are supported, such as enumerators, descriptions and more.
+
+Through Structured Output, it is guarenteed that your output will match with the schema.
+
+Example:
+
+```ts
+parameters: z.object({
+	a: z.number(),
+	b: z.number(),
+});
+```
+
+### `description`
+
+This string helps guide the AI as to when it should call the intent, and how it should format its parameters. Ensure that the description put here is specific to this Intent. If you have general comments, put it in `systemPrompt` under `createUI2`.
+
+### `onIntent`
+
+`onIntent` is an event listener which gives you a `IntentCall` and also the current input which the intent is being identified on.
+
+Read more about the `IntentCall` type to see what information you are getting.
+
+This event listener is called whenever you call the `identifyIntent` function and the specific intent you are adding is identified.
+
+Example:
+
+```ts
+.addIntent("sum", {
+	parameters: z.object({
+		a: z.number(),
+		b: z.number(),
+	}),
+	description: "Add two numbers together",
+	onIntent: (intentCall) => {
+		console.log(
+			`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+				intentCall.parameters.a + intentCall.parameters.b
+			}`
+		);
+	},
+});
+```
+
+### `onCleanup`
+
+`onIntent` is an event listener which gives you a `IntentCall` and also the current input which the intent is being cleaned up on.
+
+Read more about the `IntentCall` type to see what information you are getting.
+
+The event listener is called whenever the intent that _has been_ identified is _no longer_ identified.
+
+Note that in the Stateless API, onCleanup can only possibly be called if `currentIntents` is passed into `IdentifyIntent`. Then, if an intent in `currentIntent` is no longer identified, the cleanup will be called on it.
+
+The signature of the function is exactly the same as `onIntent`.
+
+## Intent Lifecycle Advanced Explanation
+
+This section may be confusing, but it helps explain when `onIntent` and `onCleanup` calls are skipped.
+
+In order to prevent duplicate calls and extra processing, `onIntent` and `onCleanup` are only called at very specific times. Sometimes, there may even be missing calls that may make it look like a bug. However, it could be intentional.
+
+Here are the rules for when `onIntent` is called:
+
+- If there is only _one_ intent identified, it is only called when there is no exact match (by parameters and name) in the `currentIntents`
+- If there is _more than one_ intent with the same schema identified, it is only called up to as many times it was identified, minus the existing intents with the same schema
+
+Here are the rules for when `onCleanup` is called:
+
+- If there are no intents identified, all intents are cleaned up
+- If there is more than one intent identified with the same schema in `currentIntent`, `onIntent` is only called the current amount in `currentIntent` minus the amount identified
+
+In many ways, `onIntent` is the opposite of `onCleanup`.

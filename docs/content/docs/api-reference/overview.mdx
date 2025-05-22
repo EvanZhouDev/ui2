@@ -41,15 +41,15 @@ But with the function builder syntax, it would look more like this:
 
 ```ts
 let { identifyIntent } = createUI2()
-    .addIntent("intent1", {
-        // config...
-    })
-    .addIntent("intent2", {
-        // config...
-    })
-    .addIntent("intent3", {
-        // config...
-    })
+	.addIntent("intent1", {
+		// config...
+	})
+	.addIntent("intent2", {
+		// config...
+	})
+	.addIntent("intent3", {
+		// config...
+	});
 
 identifyIntent("some intent");
 ```
@@ -63,6 +63,22 @@ But due to how `IntentCreator` is also available directly from the API, UI2 can 
 That is, you can extend the `IntentCreator` class to integrate extra capabilities, and even create new Builder Functions to use.
 
 For example, the React hook uses a custom `StatefulIntentCreator` which is uses this pattern.
+
+## Stateful UI2 Explained
+
+The "basic" UI2 API (that is, with `createUI2` and `IntentCreator`) only handles one thing: Identifying Intent based off text, and basic handling of clean up, if you pass in what intents you already know are identified.
+
+In other words, it does not keep track of the state of your UI2 app.
+
+The `StatefulIntentCreator` is an extension of the standard `IntentCreator`, and it implements various features to keep track of state in your application including:
+
+- The content of the UI2 input
+- What intents are "active" or currently identified
+- The loading state of the AI
+- All the promises and async processing
+- Submission of intents
+
+This structure is perfect for usage with React, and there is a special hook `useUI2` available under `ui2-kit/react` to access a `StatefulIntentCreator` wrapper.
 
 ## Documentation Structure
 

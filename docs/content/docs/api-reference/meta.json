@@ -8,6 +8,7 @@
 		"createUI2",
 		"addIntent",
 		"addOther",
+		"identifyIntent",
 		"statefulIntentCreator"
 	],
 	"defaultOpen": true
