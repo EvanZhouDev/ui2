@@ -2,7 +2,6 @@
 	"title": "UI2 API Reference",
 	"icon": "MyIcon",
 	"pages": [
-		"overview",
 		"types",
 		"intentCreator",
 		"createUI2",
