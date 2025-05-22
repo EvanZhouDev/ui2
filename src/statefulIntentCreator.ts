@@ -25,7 +25,7 @@ export class StatefulIntentCreator extends IntentCreator {
 		public inputValue: string,
 		public setInputValue: (value: string) => void,
 		public isLoading: boolean,
-		public setIsLoading: (value: boolean) => void
+		private setIsLoading: (value: boolean) => void
 	) {
 		const {
 			debounceDelay,
