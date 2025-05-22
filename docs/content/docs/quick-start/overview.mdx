@@ -11,8 +11,8 @@ We will add multiple intents, explore UI2's powerful yet simple API, and also le
 
 You'll create a simple intent identifier that's able to distinguish between two intents:
 
-* **Adding Two Numbers**: Takes two parameters, and logs their sum when identified
-* **Squaring a Number**: Takes one parameter, and logs their its square when identified
+- **Adding Two Numbers**: Takes two parameters, and logs their sum when identified
+- **Squaring a Number**: Takes one parameter, and logs their its square when identified
 
 This is the code we will be writing:
 
@@ -37,9 +37,6 @@ let { identifyIntent } = createUI2({
 				}`
 			);
 		},
-		onCleanup: (intentCall) => {
-			console.log("Intent cleaned up:", intentCall);
-		},
 	})
 	.addIntent("square", {
 		parameters: z.object({
@@ -53,14 +50,11 @@ let { identifyIntent } = createUI2({
 				}`
 			);
 		},
-		onCleanup: (intentCall) => {
-			console.log("Intent cleaned up:", intentCall);
-		},
 	});
 
 identifyIntent("what is 2+2");
 ```
 
-It might look complicated, but it's easy to understand, and easy to work with.
+It might look complicated, but UI2 makes creating intents as easy as defining what each intent is.
 
 If you're ready to identify some intents, let's get right into it!

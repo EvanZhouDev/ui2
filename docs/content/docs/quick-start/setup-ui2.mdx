@@ -21,7 +21,9 @@ We'll discuss the `identifyIntent` more later. However, for now, just know this 
 
 Next, in the configuration object, we need to put a `model`. These are available through the Vercel AI SDK.
 
-It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/) models for their speed. Learn how to set it up on the [Vercel AI SDK Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras). However, you can choose any provider you want.
+<Callout title="Choosing a Model">
+It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/) models for their speed. Learn how to set it up on the [Vercel AI SDK Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras). However, you can choose any provider you want. The `llama-3.3-70b` model from Cerebras works great.
+</Callout>
 
 After you have your model set up, it should look something like this:
 
@@ -33,7 +35,5 @@ let { identifyIntent } = createUI2({
 	model: cerebras("llama-3.3-70b"),
 });
 ```
-
-The `llama-3.3-70b` model from Cerebras works great.
 
 Now, let's move on to creating some intents!

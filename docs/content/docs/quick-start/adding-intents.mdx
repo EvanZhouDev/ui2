@@ -5,7 +5,7 @@ description: Adding Intents to your UI2 app
 
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
-The next step is to actually define our intents. I'll first show you the code for one such intent:
+The next step is to actually define our intents. First, here's the code for one such intent:
 
 ```ts
 import { createUI2 } from "ui2-kit";
@@ -27,9 +27,6 @@ let { identifyIntent } = createUI2({
 			}`
 		);
 	},
-	onCleanup: (intentCall) => {
-		console.log("Intent cleaned up:", intentCall);
-	},
 });
 ```
 
@@ -40,7 +37,7 @@ Let's walk through what's happening.
  
 ### Name Your Intent
 
-The first parameter of `.addIntent("sum", {})` is the name of your intent. Keep it short and ideally following the standard variable naming conventions (for example, no spaces)—However, the more descriptive it is, the better.
+The first parameter of `.addIntent("sum", {})` is the name of your intent. Keep it short and ideally following the standard variable naming conventions (for example, no spaces). However, the more descriptive it is, the better.
 
 </Step>
 <Step>
@@ -59,7 +56,10 @@ The parameters are defined using [Zod](https://zod.dev/).
 
 They must be contained in a `z.object`, but anything inside is up to you. You can even use `.describe("")` to describe your types to the AI.
 
-Powered by Structured Output, it is guarenteed the AI's output will match your schema.
+<Callout>
+	Powered by Structured Output, UI2 guarentees the AI's output will match your
+	schema.
+</Callout>
 
 However, to prevent confusion, it's still best to keep the schema relatively simple.
 
@@ -69,13 +69,15 @@ However, to prevent confusion, it's still best to keep the schema relatively sim
  
 ### Define Your Event Listeners
 
-For both `onIntent` and `onCleanup`, they take a callback with two parameters: `intentCall` and `input`.
+`onIntent`, our event listener, takes two parameters: `intentCall` and `input`.
 
 `intentCall` is an object consisting of the `name`, `id`, and `parameters` of that particular intent call.
 
 - `name` is simply the name of whatever intent was called. This is redundant, but there for continuity.
 - `id` is a UUID identifier to keep track of that particular intent identified. It can be used to prevent duplicate calls to functions, but it's more relevant with frontend.
 - `parameters` is a object in the same schema that you specified. It's fully type annotated, so you get typesafety and IDE autocomplete for its properties.
+
+In our `onIntent`, we can simply write whatever we want to happen after the Intent is identified. In this case, we'll just log a message.
 
 </Step>
 </Steps>
@@ -111,9 +113,6 @@ let { identifyIntent } = createUI2({
 				}`
 			);
 		},
-		onCleanup: (intentCall) => {
-			console.log("Intent cleaned up:", intentCall);
-		},
 	})
 	.addIntent("square", {
 		parameters: z.object({
@@ -126,9 +125,6 @@ let { identifyIntent } = createUI2({
 					intentCall.parameters.a * intentCall.parameters.a
 				}`
 			);
-		},
-		onCleanup: (intentCall) => {
-			console.log("Intent cleaned up:", intentCall);
 		},
 	});
 ```
