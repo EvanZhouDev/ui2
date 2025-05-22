@@ -2,3 +2,23 @@
 title: Using Intent Call IDs
 description: Learn how to link UI2 to IDs
 ---
+
+Each Intent Call comes with an ID that is kept throughout it's lifecycle.
+
+## Why is the ID needed?
+
+Using IDs means that you can use it to reference something throughout the `onIntent`, `onCleanup`, or even `onSubmit` (with the React hook) of an intent.
+
+Furthermore, it allows you to keep track of intents with the exact same name and parameters.
+
+## How IDs are Assigned
+
+IDs are simply created with `crypto.randomUUID()`.
+
+A new ID is only created when a new Intent has different parameters, or there is more intents with the same parameters identified than currently. (i.e. a new ID is only created when `onIntent` is called).
+
+It is highly recommended to associate previews of Intents with IDs, so they can later be confirmed with `onSubmit` if applicable.
+
+## Usage Example
+
+Read the React Quick Start for examples of how to use these IDs to keep track of various todos.
