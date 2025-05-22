@@ -34,15 +34,18 @@ For our app, we can identify the following intents and what should happen in the
 
 As you can see, all of these intents have a very similar lifecycle. As such, UI2 is designed to be compatible with a wide variety of different applications.
 
-Take a moment to familiarize yourself with this lifecycle.
+<Callout>
+	Take a moment to familiarize yourself with this lifecycle! It'll make using
+	UI2 much easier.
+</Callout>
 
 If it's helpful, in general for UI2, the lifecycle should look like this:
 
-* `onIntent`: Typically the first event listener called, when the intent is detected
-  * This event listener is responsible for showing a preview of the user's Intent, translated to Action
-* `onCleanup`: Possibly called after `onIntent`, after the intent is no longer detected
-  * This event listener is responsible for removing that preview of the user's Intent to "clean up" any side-effects
-* `onSubmit`: Called when the user "submits" the intent by confirming. Cleanup is _not_ called when submitted
-  * This event listener is responsible for "confirming" the preview.
+- `onIntent`: Typically the first event listener called, when the intent is detected
+  - This event listener is responsible for showing a preview of the user's Intent, translated to Action
+- `onCleanup`: Possibly called after `onIntent`, after the intent is no longer detected
+  - This event listener is responsible for removing that preview of the user's Intent to "clean up" any side-effects
+- `onSubmit`: Called when the user "submits" the intent by confirming. Cleanup is _not_ called when submitted
+  - This event listener is responsible for "confirming" the preview.
 
 To make this even more concrete, let's see how we can actually implement this in our app.

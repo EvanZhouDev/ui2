@@ -3,9 +3,13 @@ title: Quick Start Overview
 description: What are we building?
 ---
 
+<Callout>
+If you haven't already, it can be helpful to read the [Core Quick Start](/quick-start/overview), but this course will also make sense without it.
+</Callout>
+
 In this Quick Start guide, we'll be creating our first UI2 application, with Next.js and React.
 
-We'll be using a custom React UI2 hook that's powered by a Stateful UI2 API, allowing you to easily combine UI2 with your existing apps, or to build a completely new app with UI2.
+We'll be using a custom **React UI2 hook** that's powered by a **Stateful UI2 API**, allowing you to easily combine UI2 with your existing apps, or to build a completely new app with UI2.
 
 We will add multiple intents, explore UI2's powerful React integration, and also learn how to use UI2 to identify and submit intents based on a textbox content.
 
@@ -16,17 +20,19 @@ You'll create a simple Todo app that has two main features:
 - **Adding a Todo**: Create a new todo with a name
 - **Complete Todo**: Helps you mark a todo as done
 
+You'll be able to use these features by simply typing into a **UI2 Input**, and you'll be able to see live previews of the intents as they are being identified.
+
 You'll be seeing how we can use UI2's features including:
 
 - **Context**: A simple way to provide UI2 with context about your app
 - **Intent ID**: A way to keep track of what intents are being called—and reduce unnecessary re-renders
 - **Cleanup**: An event listener called when an intent is no longer detected
 
-This is the code we will be writing:
+This is the final code we will be writing:
 
 ```tsx
 "use client";
-import { useUI2 } from "ui2.js";
+import { useUI2 } from "ui2-kit";
 import { cerebras } from "@ai-sdk/cerebras";
 import { useState } from "react";
 import { z } from "zod";
@@ -127,6 +133,6 @@ export default function Page() {
 }
 ```
 
-It might look complicated, but it's easy to understand, and easy to work with.
+It might look complicated, but working with UI2 is as simple as describing your Intent in code.
 
 If you're ready to identify some intents with your React app, let's get right into it!

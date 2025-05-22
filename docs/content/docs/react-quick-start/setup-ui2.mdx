@@ -42,7 +42,7 @@ export default function Page() {
 
 We're also including a `preview` field and UI state to each reminder. It'll make more sense when we start making intents and previewing intent actions.
 
-Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. The Here's what it should look like:
+Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. Here's what it should look like:
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
@@ -63,7 +63,13 @@ Let's update our input and submit button to use these returned variables:
 
 Next, in the configuration object for `useUI2`, we need to put a `model`. These are available through the Vercel AI SDK.
 
-It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/) models for their speed. Learn how to set it up on the [Vercel AI SDK Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras). However, you can choose any provider you want.
+It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/)
+models for their speed. Learn how to set it up on the [Vercel AI SDK
+Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
+
+<Callout type="warn" title="Structured Output">
+UI2 uses Structured Output to guarentee that your Intent parameter schemas are satisfied. Your model has to support this feature. `llama-3.3-70b` from Cerebras works great.
+</Callout>
 
 After you have your model set up, it should look something like this:
 
@@ -75,26 +81,29 @@ let { inputValue, onInputChange, onSubmit } = useUI2({
 });
 ```
 
-Let's also provide a System Prompt to tell the model what app we're making:
+Let's also provide a **System Prompt** to tell the model what app we're making:
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 });
 ```
 
 Finally, we have to give the model access to our reminders. We can use the `context` field to pass in any relevant state object.
 
+<Callout title="Using Context">
+	Context is one of the special features of UI2. Not only is intent
+	identification based on your input, it's also based off of data from your app.
+</Callout>
+
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 });
 ```
-
-Context is an interesting part of UI2, as not only is intent detection now based off just the single text you are typing in, it's also based on everything in your app.
 
 Altogether, your file should look like this now:
 
@@ -115,7 +124,7 @@ export default function Page() {
 	>([]);
 
 	let { inputValue, onInputChange, onSubmit } = useUI2({
-		model: cerebras("llama-4-scout-17b-16e-instruct"),
+		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
 		context: todos,
 	});

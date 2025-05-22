@@ -13,7 +13,7 @@ Let's start with the `addTodo` intent. Remember this is what we wanted it to do:
   - `onCleanup`: Remove the preview
   - `onSubmit`: Actually add the new todo to the list
 
-Feel free to review the lifecycle of a UI2 intent in the prior sections.
+Feel free to review the lifecycle of a UI2 intent in the [prior sections](/react-quick-start/thinking-in-ui2).
 
 ## Basic Intent Setup
 
@@ -21,7 +21,7 @@ In order to add an intent, we simply call `.addIntent()` on the `useUI2()` hook,
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 }).addIntent("addTodo", {
@@ -33,7 +33,7 @@ We'll start by defining the intent description, and the parameters, like such:
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 }).addIntent("addTodo", {
@@ -46,21 +46,29 @@ let { inputValue, onInputChange, onSubmit } = useUI2({
 
 The parameters are defined using [Zod](https://zod.dev/).
 
-They must be contained in a `z.object`, but anything inside is up to you. You can even use `.describe("")` to describe your types to the AI.
+They must be contained in a `z.object`, but anything inside is up to you. Powered by
+Structured Output, it is guarenteed the AI's output will match your schema.
 
-Powered by Structured Output, it is guarenteed the AI's output will match your schema.
-
-However, to prevent confusion, it's still best to keep the schema relatively simple.
+<Callout title="Using Zod">
+	You can even use `.describe("")` to describe your types to the AI, or use
+	other advanced features like Enumerators. However, to prevent confusion, it's
+	still best to keep the schema relatively simple.
+</Callout>
 
 ## `onIntent` Setup
 
-Next, we will define the `onIntent` callback. This function should return the cleanup function, much like `useEffect`.
+Next, we will define the `onIntent` callback.
 
 In the main `onIntent`, we'll create a new reminder, with the `preview` status set to `true`. In this way, the user can see a live preview of the new todo (handled in the UI), before they actually add it to the list.
 
+<Callout title="Preview">
+	The idea of previewing-before-committing is a core concept of UI2. Your apps
+	should follow this pattern.
+</Callout>
+
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 }).addIntent("addTodo", {
@@ -82,17 +90,44 @@ let { inputValue, onInputChange, onSubmit } = useUI2({
 });
 ```
 
+<Callout title="Destructuring Parameters">
+	If you've come from the [Core Quick Start](/quick-start/overview), you've likely seen a different syntax.
+
+    Remember that the first parameter of `onIntent` is of an `IntentCall` type. You can make this a variable like such:
+
+    ```ts
+    onIntent: (intentCall) => {
+    	setTodos((prev) => [
+    		...prev,
+    		{
+    			intentCall.id,
+    			name: intentCall.parameters.name,
+    			completed: false,
+    			preview: true,
+    		},
+    	]);
+    }
+    ```
+
+    Or use destructuring just like you see above.
+
+</Callout>
+
 Note that all intent calls come with a `id` field. This helps internally track which intent calls are going on, but they can also be used as a way to identify specific actions that are being taken, such as the todos created in this case.
 
 ## `onCleanup` Setup
 
 This is where our `id` comes in handy. Instead of referring to our Todo with the name, which might be inaccurate, we can simply use the id that came with the UI2 Intent Identification.
 
+<Callout title="UI2 Intent ID">
+	These intent IDs carry throughout the Intent's lifecycle. As such, it's valuable to use them when cleaning up.
+</Callout>
+
 What we need to do now when "cleaning up" our intent is to essentially undo what we did in the `onIntent`. In this case, it's simply removing the todo.
 
 ```tsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 }).addIntent("addTodo", {
@@ -127,7 +162,7 @@ Here's our final code so far:
 
 ```jsx
 let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
+	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	context: todos,
 }).addIntent("addTodo", {
@@ -207,8 +242,8 @@ Note that this is very similar to our `addTodo` intent, and follows a similar li
 
 However, note the difference between `parameters.id` and the `id` we're receiving directly from the intent call:
 
-* `id` in the destructured object refers to the `id` associated with this particular intent call
-* `parameters.id` refers to the `id` that the AI has generated, based on what it knows from the context of the todos
+- `id` in the destructured object refers to the `id` associated with this particular intent call
+- `parameters.id` refers to the `id` that the AI has generated, based on what it knows from the context of the todos
 
 In fact, it's reasonable to rename `parameters.id` like this:
 
