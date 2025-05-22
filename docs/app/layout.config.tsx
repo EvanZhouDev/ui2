@@ -27,6 +27,7 @@ export const baseOptions: BaseLayoutProps = {
 			</>
 		),
 	},
+	githubUrl: "https://github.com/evanzhoudev/ui2",
 	links: [
 		{
 			text: "Documentation",
