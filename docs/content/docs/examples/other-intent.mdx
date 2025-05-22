@@ -5,7 +5,9 @@ description: Learn how to use the catch-all Other intent and its special feature
 
 The `other` intent is unique. It acts as a catch-all intent for cases where no other intent can be matched.
 
-Note that you cannot name a normal intent `"other"`.
+<Callout type="warn">
+You cannot name a normal intent `"other"`. If you wish to manipulate properties on the `other` intent, you must use the `addOther` method.
+</Callout>
 
 Using the `other` intent could look something like this:
 
