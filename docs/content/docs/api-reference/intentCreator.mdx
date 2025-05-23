@@ -5,7 +5,7 @@ description: The backbone of UI2 intent creation, wrapped by createUI2
 
 The `IntentCreator` class is what powers all instances of UI2. We will discuss all properties and methods on this class.
 
-Note that this class is not meant to be directly used by the enduser, but it is exposed to help extend UI2.
+Note that this class is not meant to be directly, but it is exposed to help extend UI2.
 
 ## Constructor
 
@@ -28,7 +28,13 @@ Let's go through each of these parameters:
 
 You have two options to supply the model. First, you can use a Vercel AI SDK compatible `LanguageModel`, based off a [provider](https://ai-sdk.dev/providers/ai-sdk-providers).
 
-It is recommended to use [Cerebras](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
+It is recommended to use [Cerebras](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras) for its speed.
+
+<Callout type="warn" title="Structured Output">
+	UI2 uses Structured Output to guarentee that your Intent parameter schemas are
+	satisfied. Your model has to support this feature. `llama-3.3-70b` from
+	Cerebras works great.
+</Callout>
 
 However, if you do not want to use Vercel AI SDK, you can also directly use a object of the following schema:
 
@@ -52,7 +58,7 @@ You should tell it what app you are building, and generally when to identify eac
 
 This is an object that supplies context to the AI. Remember that this object should have a stable reference, since whenever the reference is updated, the context will also be updated.
 
-This context can have any schema, and will be directly provided as-is to the AI.
+This context can have any schema, and will be directly provided after having `JSON.stringify()` called on it to the AI.
 
 ### `onLoadStart` and `onLoadEnd`
 
@@ -66,7 +72,10 @@ This is a risky event listener to use, since the object may not be complete.
 
 However, if in theory you wished to make an integration to livetime stream incomplete toolcalls, this could be useful.
 
-Note that it returns what is seemingly a normal array of `IntentCall`s, but its properties may be incomplete.
+<Callout type="warn">
+	Note that it returns what is seemingly a normal array of `IntentCall`s (based
+	off the type), but its properties may be incomplete.
+</Callout>
 
 ### `onIntent`
 
@@ -86,7 +95,12 @@ This is a way to globally process intents, if you do not want to specify intent 
 
 ## Methods
 
-The `IntentCreator` class also has a few significant methods to be aware of. **These may be better documented in the later sections specifically on these methods** (as accessed through the Builder Function).
+The `IntentCreator` class also has a few significant methods to be aware of.
+
+<Callout>
+	These methods may be better documented in the later sections specifically on
+	these methods (as accessed through the Builder Function).
+</Callout>
 
 ### `identifyIntent`
 
@@ -114,16 +128,19 @@ This function adds an intent, to be able to later be identified.
 
 This takes two parameters: One for the name of the intent, and the other for intent options, as listed below:
 
-| Value Name    | Type                                                                     | Description                                         |
-| :------------ | :----------------------------------------------------------------------- | :-------------------------------------------------- |
-| `parameters`  | `z.ZodType` (default: `z.ZodObject<any>`)                                | Zod schema defining the parameters for this intent. |
-| `description` | `string`                                                                 | Description of what the intent does.                |
+| Value Name    | Type                                                  | Description                                         |
+| :------------ | :---------------------------------------------------- | :-------------------------------------------------- |
+| `parameters`  | `z.ZodType` (default: `z.ZodObject<any>`)             | Zod schema defining the parameters for this intent. |
+| `description` | `string`                                              | Description of what the intent does.                |
 | `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.              |
-| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.      |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is no longer detected.      |
 
 These intents are later able to be identified.
 
-Note that you _cannot_ create an intent named `other`. Use the following `addOther` intent to achieve this.
+<Callout type="warn">
+	Note that you _cannot_ create an intent named `other`. Use the following
+	`addOther` method to achieve this.
+</Callout>
 
 ### `addOther`
 
@@ -133,11 +150,11 @@ addOther(intent: OtherIntent): this
 
 The `other` intent is unique, since it acts as a catch-all for any intent that isn't listed. It always exists even if you don't define it, but you can customize it's behavior. The configuration is very similar to `addIntent`, but it is missing various things that you cannot customize.
 
-| Value Name    | Type                                                                     | Description                                      |
-| :------------ | :----------------------------------------------------------------------- | :----------------------------------------------- |
-| `description` | `string`                                                                 | Customize when the `other` intent can be called. |
+| Value Name    | Type                                                  | Description                                      |
+| :------------ | :---------------------------------------------------- | :----------------------------------------------- |
+| `description` | `string`                                              | Customize when the `other` intent can be called. |
 | `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.           |
-| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void`                    | Called when this intent is no longer detected.   |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is no longer detected.   |
 
 ## Conclusion
 

@@ -21,11 +21,11 @@ The `StatefulIntentCreator` has a few critical differences from the standard sta
 
 This Stateful API is mainly used to be mounted on React, but it also serves as an example for other extensions of UI2 (i.e. built for other frameworks, or other types of UIs).
 
-The following documentation will only go over the _differences_ from the initial API. It will not cover all properties available on the `StatefulIntentCreator`.
+The following documentation will only go over the _differences_ from the initial API. It will not cover all properties available on the `StatefulIntentCreator`. Read [documentation for the `IntentCreator`](/api-reference/intentCreator) for more information.
 
 ## What is the UI2 Input?
 
-THe UI2 input is the main way that a user is meant to communicate with the UI2 application. This currently is through text input.
+The UI2 input is the main way that a user is meant to communicate with the UI2 application. This currently is through text input.
 
 This text input is able to trigger intent identification, submission, and more.
 
@@ -41,10 +41,10 @@ The constructor similarly takes a Configuration object with the following inform
 
 However, it also takes a few extra properties in this order after the configuration:
 
-* `inputValue` and `setInputValue`: Setter and getter for the state of the UI2 input (string)
-* `isLoading` and `setIsLoading`: Setter and getter for the state of the loading indicator (boolean)
+- `inputValue` and `setInputValue`: Setter and getter for the state of the UI2 input (string)
+- `isLoading` and `setIsLoading`: Setter and getter for the state of the loading indicator (boolean)
 
-The React hook takes care of creating and providing these states.
+The [React hook](/react-hook-reference) takes care of creating and providing these states.
 
 ### `debounceDelay`
 
@@ -52,10 +52,12 @@ This is how long, in milliseconds, the app should wait before identifying intent
 
 This number should be carefully tailored to ensure balance:
 
-* If it's **too short**, you could use too many tokens and requests to the AI server
-* If it's **too long**, UI2 will feel less natural
+- If it's **too short**, you could use too many tokens and requests to the AI server
+- If it's **too long**, UI2 will feel less natural
 
-Note that this is different from standard debounce numbers, because the debounce delay does not take into account the processing time of the AI. Because of this, if you use a faster model, even a longer debounce delay could feel natural.
+Note that this is slightly different from standard debounce timings, because the debounce delay does not take into account the processing time of the AI. In other words, the "preceived" debounce delay can be longer than the actual debounce delay.
+
+Because of this, if you use a faster model, even a longer debounce delay could feel natural.
 
 ### `onSubmitStart` and `onSubmitComplete`
 
@@ -65,33 +67,41 @@ Note that submission is not instantaneous, and thus two event listeners are need
 
 The delay in submission is due to the fact that there is a period of time where possibly, your intent is still being detected or a completely new intent detection is started.
 
-* `onSubmitStart` is called immediately when submission begins
-* `onSubmitComplete` is called when all processing has been finished
+- `onSubmitStart` is called immediately when submission begins
+- `onSubmitComplete` is called when all processing has been finished
 
-Note that `onSubmitStart` by default clears the input box. You can modify this behavior.
+<Callout>
+	`onSubmitStart` by default clears the input box. You can modify this behavior.
+</Callout>
 
-Furthermore, the input box content is stored, so you do not have to worry about data loss.
+Furthermore, the input box content is stored, so you do not have to worry about data loss when clearing the input.
 
-## `onInputChange`
+## Methods
+
+There are a few new methods on `StatefulIntentCreator` and also a few methods with updates.
+
+### `onInputChange`
 
 This event listener of course updates the input value.
 
 However, it also does a few other things in the Stateful API to manage asynchronous handling including cache validation and more for submitting.
 
-## `onSubmit`
+### `onSubmit`
 
 The issue with intent detection is that both _detecting_ and _submitting_ your intents should feel fast and snappy.
 
 This is why `onSubmit` has a few features to ensure that experience:
 
-* When there is no identification going on (i.e. during debounce), a completely new request is triggered and then submit
-* When there is identification going on already, St
-atefulIntentCreator will wait for that to complete and then submit
-* Finally, and possibly most commonly, if an identification has already completed, no new identification will start, and it will directly submit.
+- When there is no identification going on (i.e. during debounce), a completely new request is triggered and then submit
+- When there is identification going on already, St
+  atefulIntentCreator will wait for that to complete and then submit
+- Finally, and possibly most commonly, if an identification has already completed, no new identification will start, and it will directly submit.
 
 Note that `onSubmit` uses various checks to ensure the cache is up-to-date and it is submitting the right thing. In the case that it is unsure, a new identification is always started to be safe.
 
-And, as a plus, submission is completely spam proof.
+<Callout>
+Submission is completely spam-proof!
+</Callout>
 
 ## `addIntent`
 

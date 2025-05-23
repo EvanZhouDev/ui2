@@ -5,8 +5,6 @@ description: Learn the important UI2 API types
 
 This type overview will only go through the important types that are not configurations (or in other words, any type that is used specifically for a method or function to configure it).
 
-Instead, it will go over the critical types to UI2.
-
 ## Core Types
 
 These types are core to UI2, and are the basic building blocks of all UI2 applications. Other types, including those for the Stateful/React implementation, extend these.
@@ -44,7 +42,7 @@ The `IntentCall` represents a single call when an Intent is identified.
 It contains three important attributes:
 
 - `name`: This name tells you which Intent was identified
-- `id`: This is an ID unique to that specific Intent identified. It will be used as well during cleanup and submit, so you can use it to prevent excess re-render
+- `id`: This is an ID unique to that specific Intent identified. It will be used as well during cleanup and submit, so you can use it to track the intent throughout its lifecycle
 - `parameters`: This is an object structured exactly the same as the `parameters` passed in the `Intent`
 
 `IntentCalls` are used as the standard method of passing data back from any intent identified, even in extensions of UI2.

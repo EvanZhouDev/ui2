@@ -58,11 +58,15 @@ As you can see, you no longer need to have a reference to IntentCreator, but can
 
 ### Extending UI2
 
-But due to how `IntentCreator` is also available directly from the API, UI2 can easily be extended.
+Extending UI2 comes in two main steps.
 
-That is, you can extend the `IntentCreator` class to integrate extra capabilities, and even create new Builder Functions to use.
+First, extending `IntentCreator`. Extensions of `IntentCreator` should be more general (and can possibly be used with multiple wrapper functions).
 
-For example, the React hook uses a custom `StatefulIntentCreator` which is uses this pattern.
+Then, for your specific use-case, you can create a new wrapper function using your `IntentCreator`. The most basic of which simply returns an instance of the class.
+
+For example, the [React hook](/react-hook-reference) uses the [`StatefulIntentCreator` class](/statefulIntentCreator) which is uses this pattern.
+
+Read the [Advanced Usage Extending UI2 documentation](/examples/extending-ui2) for more information.
 
 ## Stateful UI2 Explained
 
@@ -72,18 +76,18 @@ In other words, it does not keep track of the state of your UI2 app.
 
 The `StatefulIntentCreator` is an extension of the standard `IntentCreator`, and it implements various features to keep track of state in your application including:
 
-- The content of the UI2 input
-- What intents are "active" or currently identified
-- The loading state of the AI
-- All the promises and async processing
-- Submission of intents
+- The content of the **UI2 input**
+- What intents are **"active"** or **currently identified**
+- The **loading state** of the AI
+- All the **promises** and async processing
+- **Submission** of intents
 
 This structure is perfect for usage with React, and there is a special hook `useUI2` available under `ui2-kit/react` to access a `StatefulIntentCreator` wrapper.
 
 ## Documentation Structure
 
-We'll first go through the `IntentCreator` class, and how it works.
+We'll first go through the [`IntentCreator` class](/api-reference/intentCreator), and how it works.
 
-Then, we'll discuss `createUI2` and it's methods.
+Then, we'll discuss [`createUI2` and its methods](/api-reference/createUI2).
 
-Finally, we will talk more about how to use the core extensions of `StatefulIntentCreator` and the React Hook.
+Finally, we will talk more about how to use the core extensions of the [`StatefulIntentCreator` class](/statefulIntentCreator) and the [React Hook](/react-hook-reference).

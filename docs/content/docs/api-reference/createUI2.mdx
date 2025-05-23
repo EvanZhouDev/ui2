@@ -13,8 +13,6 @@ Furthermore, most methods on the `IntentCreator` class also return a `this`, whi
 
 This page will explain the core `createUI2` function, and the following sections will explain its various other methods.
 
-These sections will go into much more detail than the documentation for `IntentCreator`.
-
 ## `createUI2` Parameters
 
 | Value Name        | Type                                               | Description                                                  |
@@ -32,7 +30,13 @@ These sections will go into much more detail than the documentation for `IntentC
 
 You have two options to supply the model. First, you can use a Vercel AI SDK compatible `LanguageModel`, based off a [provider](https://ai-sdk.dev/providers/ai-sdk-providers).
 
-It is recommended to use [Cerebras](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
+It is recommended to use [Cerebras](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras) for its speed.
+
+<Callout type="warn" title="Structured Output">
+	UI2 uses Structured Output to guarentee that your Intent parameter schemas are
+	satisfied. Your model has to support this feature. `llama-3.3-70b` from
+	Cerebras works great.
+</Callout>
 
 However, if you do not want to use Vercel AI SDK, you can also directly use a object of the following schema:
 
@@ -45,6 +49,7 @@ However, if you do not want to use Vercel AI SDK, you can also directly use a ob
 ```
 
 This helps specify any provider that is compliant with OpenAI schema.
+
 
 ### `systemPrompt`
 
@@ -70,7 +75,10 @@ This is a risky event listener to use, since the object may not be complete.
 
 However, if in theory you wished to make an integration to livetime stream incomplete toolcalls, this could be useful.
 
-Note that it returns what is seemingly a normal array of `IntentCall`s, but its properties may be incomplete.
+<Callout type="warn">
+	Note that it returns what is seemingly a normal array of `IntentCall`s (based
+	off the type), but its properties may be incomplete.
+</Callout>
 
 ### `onIntent`
 

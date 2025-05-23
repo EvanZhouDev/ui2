@@ -1,15 +1,19 @@
 ---
-title: React API Reference
+title: React Hook Reference
 description: A custom hook based off StatefulIntentCreator, for React
 ---
 
-It is highly recommended that you read the UI2 API Reference and the StatefulIntentCreator Reference first before reading this.
+<Callout title="Prerequisites">
+	It is highly recommended that you read the [UI2 Core API
+	Reference](/api-reference-overview) and the [StatefulIntentCreator
+	Reference](/statefulIntentCreator) first before reading this.
+</Callout>
 
-While the `StatefulIntentCreator` is not intended to be directly used, there is a React Hook which directly helps you use `StatefulIntentCreator` with React.
+While the `StatefulIntentCreator` is not intended to be directly used, there is a **React Hook** which directly helps you use `StatefulIntentCreator` with React.
 
 It automatically creates the `StatefulIntentCreator` instance, but it also helps you create states for loading, input box, and more.
 
-It also binds your context to the class, as well as uses a ref to that class, ensuring it's always up-to-date.
+It also binds your context to the class, as well as uses a `ref` to that class, ensuring it's always up-to-date.
 
 ## What the React Hook does
 
@@ -24,7 +28,7 @@ Due to this, you simply have to hook up a few states returned from the hook to y
 
 ## Configuration
 
-The configuration for the React API is identical to that of `createUI2`. Consult that documentation for more information.
+The configuration for the React API is identical to that of `createUI2`. Consult [`createUI2` documentation for more information](/api-reference/createUI2) about each of the values.
 
 | Value Name        | Type                                               | Description                                                  |
 | :---------------- | :------------------------------------------------- | :----------------------------------------------------------- |
@@ -43,6 +47,11 @@ Furthermore, the process of adding intents is also identical. You will use the `
 
 The only difference is that now there is a `onSubmit` event listener that you can pass in. This event listener is called when that specific intent is identified, and the Submit function is called.
 
+There are a few important things about submission:
+
+1. **There is no cleanup**: Cleanup is _not_ called when submitting
+2. **Operate on your preview**: Due to that, you should use a simple operation to "confirm" your preview instead of adding new elements to state or otherwise.
+
 ## Return Value
 
 An instance of `StatefulIntentCreator` is returned, with many helpful functions that you can destructure out of it. Let's go through them:
@@ -53,7 +62,7 @@ An instance of `StatefulIntentCreator` is returned, with many helpful functions 
 | `onSubmit`      | What should be called when the UI2 input box is submitted, triggering `onSubmit` on the current Intents. |
 | `inputValue`    | Allows directly controlling value of the input box                                                       |
 | `setInputValue` | Allows directly controlling value of the input box                                                       |
-| `onInputChange` | What should be called when your UI2 input box changes. Triggers processing intents, among other things. |
+| `onInputChange` | What should be called when your UI2 input box changes. Triggers processing intents, among other things.  |
 
 ### `isLoading`
 
