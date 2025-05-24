@@ -156,7 +156,7 @@ ${text}
 			mode: "json",
 			prompt: this.createPrompt(text),
 			onError: (error) => {
-				console.error("Error:", error);
+				console.warn("Error:", error);
 			},
 		});
 

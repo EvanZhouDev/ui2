@@ -85,7 +85,7 @@ export class StatefulIntentCreator extends IntentCreator {
 				return identifiedIntents;
 			}
 		} catch (e) {
-			console.error("Error identifying intent:", e);
+			console.warn("Error identifying intent:", e);
 			this.activeIntentCalls = [];
 			throw e;
 		}
@@ -125,7 +125,7 @@ export class StatefulIntentCreator extends IntentCreator {
 				intentsToProcess = await this.currentIdentificationPromise;
 				this.lastIdentifiedInput = currentInputValue;
 			} catch (e) {
-				console.error(
+				console.warn(
 					"Error awaiting in-progress identification during submit:",
 					e
 				);
