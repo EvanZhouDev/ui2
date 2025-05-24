@@ -88,6 +88,19 @@ ${text}`;
 		});
 	};
 
+	public setContext(context: object) {
+		this.config.context = context;
+	}
+
+	public removeIntent(intentName: string) {
+		if (this.intents[intentName]) {
+			delete this.intents[intentName];
+		} else {
+			throw new Error(`Intent with name "${intentName}" does not exist.`);
+		}
+		return this;
+	}
+
 	async identifyIntent(text: string, config?: IdentifyIntentConfig) {
 		let model: LanguageModel;
 		if ("specificationVersion" in this.config.model) {
@@ -200,7 +213,7 @@ ${text}`;
 			parameters: {},
 			id: "",
 		};
-		// In the case there was an existing other, but now the input is blank	
+		// In the case there was an existing other, but now the input is blank
 		if (hasExistingOther && text.trim() == "") {
 			if (this.intents["other"]) {
 				this.intents["other"].onCleanup?.(otherCall, text);
@@ -245,7 +258,10 @@ ${text}`;
 		return activeIntentCalls;
 	}
 
-	addIntent<T extends z.ZodType>(intentName: string, intent: IntentPartialOptional<T>): this {
+	addIntent<T extends z.ZodType>(
+		intentName: string,
+		intent: IntentPartialOptional<T>
+	): this {
 		if (intentName === "other")
 			throw new Error(
 				"Intent name cannot be `other`. If you wish to add an `other` intent, use the `addOther` method."
@@ -254,7 +270,7 @@ ${text}`;
 			onCleanup: () => {},
 			description: "",
 			...intent,
-		}
+		};
 		this.intents[intentName] = completeIntent;
 		return this;
 	}
