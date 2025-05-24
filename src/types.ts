@@ -73,10 +73,10 @@ export type StatefulIntentCreatorConfig =
 
 export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =
 	Intent<T> & {
-		onSubmitIntent: (intentCall: IntentCall<T>, input: string) => void;
+		onSubmit: (intentCall: IntentCall<T>, input: string) => void;
 	};
 export type StatefulIntentPartialOption<
 	T extends z.ZodType = z.ZodObject<any>
 > = IntentPartialOptional<T> & {
-	onSubmitIntent?: (intentCall: IntentCall<T>, input: string) => void;
+	onSubmit?: (intentCall: IntentCall<T>, input: string) => void;
 };

@@ -91,7 +91,7 @@ export class StatefulIntentCreator extends IntentCreator {
 		}
 	};
 
-	onInputChange = (text: string) => {
+	handleInputChange = (text: string) => {
 		this.setInputValue(text);
 		if (this.inputDebounceHandler) {
 			this.inputDebounceHandler.clear();
@@ -100,7 +100,7 @@ export class StatefulIntentCreator extends IntentCreator {
 		this.inputDebounceHandler(text);
 	};
 
-	onSubmit = async () => {
+	handleSubmit = async () => {
 		const currentInputValue = this.inputValue;
 		this.config.onSubmitStart?.(currentInputValue);
 		if (this.inputDebounceHandler) {
@@ -169,18 +169,18 @@ export class StatefulIntentCreator extends IntentCreator {
 		for (const intentCall of intentsToProcess) {
 			if (
 				this.intents[intentCall.name] &&
-				typeof this.intents[intentCall.name].onSubmitIntent === "function"
+				typeof this.intents[intentCall.name].onSubmit === "function"
 			) {
-				this.intents[intentCall.name].onSubmitIntent(
+				this.intents[intentCall.name].onSubmit(
 					intentCall,
 					currentInputValue
 				);
 			} else if (
 				intentCall.name === "other" &&
 				this.intents["other"] &&
-				typeof this.intents["other"].onSubmitIntent === "function"
+				typeof this.intents["other"].onSubmit === "function"
 			) {
-				this.intents["other"].onSubmitIntent(intentCall, currentInputValue);
+				this.intents["other"].onSubmit(intentCall, currentInputValue);
 			}
 		}
 
@@ -195,7 +195,7 @@ export class StatefulIntentCreator extends IntentCreator {
 	): this {
 		let completeIntent: StatefulIntent<T> = {
 			onCleanup: () => {},
-			onSubmitIntent: () => {},
+			onSubmit: () => {},
 			description: "",
 			...intent,
 		};
