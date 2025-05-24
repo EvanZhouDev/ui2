@@ -42,11 +42,16 @@ export class IntentCreator {
 		return `
 Your goal is to translate the user text into as many **Intents** as possible.
 
-Each of these **Intents** take the form of an action, and it is your goal to convert the user's input into these actions.
+* The user may not be obvious with their **Intents**
+	* Thus, you must imply the user's intent from their input
+* The user may give multiple commands in one input, and you should try to identify all of them
+* It is given that the user is expressing one of the following intents
+* It is always better to identify an intent than to not identify one
+* It may be helpful not to take the user's input literally, but rather to interpret it in the context of the intents
 
 ${
 	this.config.systemPrompt &&
-	`The user gives you the following instructions:
+	`The user gives you the following additional instructions and information about their situation:
 \`\`\`
 ${this.config.systemPrompt}
 \`\`\``
@@ -54,7 +59,7 @@ ${this.config.systemPrompt}
 
 ${
 	this.config.context &&
-	`The user gives you the following context:
+	`The user gives you the following context and data about their situation:
 \`\`\`
 ${JSON.stringify(this.config.context, null, 2)}
 \`\`\``
@@ -75,9 +80,15 @@ ${intentsSection}
 * You may and should return multiple intents when the user's command includes multiple actions
 * You should always return an intent, if not more
 * Only if you are completely unsure, you should return a length-1 array with one intent with name \`other\` and blank parameters, but use this sparingly.
+* NEVER return \`other\` with other intents
 
 # User Input
-${text}`;
+
+Translate the following user input into intents:
+\`\`\`
+${text}
+\`\`\`
+`;
 	};
 
 	// Allows IntentCalls to be compared
