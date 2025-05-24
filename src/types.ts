@@ -68,7 +68,7 @@ export type StatefulIntentCreatorConfig =
 	| IntentCreatorConfig & {
 			debounceDelay?: number;
 			onSubmitStart?: (input?: string) => void;
-			onSubmitComplete?: (input?: string) => void;
+			onSubmitEnd?: (input?: string) => void;
 	  };
 
 export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =

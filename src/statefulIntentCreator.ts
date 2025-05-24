@@ -30,7 +30,7 @@ export class StatefulIntentCreator extends IntentCreator {
 		const {
 			debounceDelay,
 			onSubmitStart,
-			onSubmitComplete,
+			onSubmitEnd,
 			...intentCreatorConfig
 		} = config;
 		super(intentCreatorConfig as IntentCreatorConfig);
@@ -110,7 +110,7 @@ export class StatefulIntentCreator extends IntentCreator {
 		if (currentInputValue.trim() == "") {
 			this.activeIntentCalls = [];
 			this.lastIdentifiedInput = null;
-			this.config.onSubmitComplete?.(currentInputValue);
+			this.config.onSubmitEnd?.(currentInputValue);
 			this.setIsLoading(false);
 			return;
 		}
@@ -184,7 +184,7 @@ export class StatefulIntentCreator extends IntentCreator {
 			}
 		}
 
-		this.config.onSubmitComplete?.(currentInputValue);
+		this.config.onSubmitEnd?.(currentInputValue);
 		this.activeIntentCalls = [];
 		this.lastIdentifiedInput = null;
 	};

@@ -13,7 +13,7 @@ export let useUI2 = (config: UI2ReactConfig) => {
 		onSubmitStart: () => {
 			setInputVal("");
 		},
-		onSubmitComplete: () => {},
+		onSubmitEnd: () => {},
 		onPartialIntent: () => {},
 		onLoadStart: () => {},
 		onLoadEnd: () => {},
