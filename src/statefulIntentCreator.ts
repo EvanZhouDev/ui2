@@ -2,9 +2,9 @@ import {
 	IdentifyIntentConfig,
 	IntentCreatorConfig,
 	IntentCall,
-	IntentPartialOptional,
 	StatefulIntent,
 	StatefulIntentCreatorConfig,
+	StatefulIntentPartialOption,
 } from "./types";
 import { IntentCreator } from "./intentCreator";
 import debounce, { DebouncedFunction } from "debounce";
@@ -169,15 +169,18 @@ export class StatefulIntentCreator extends IntentCreator {
 		for (const intentCall of intentsToProcess) {
 			if (
 				this.intents[intentCall.name] &&
-				typeof this.intents[intentCall.name].onSubmit === "function"
+				typeof this.intents[intentCall.name].onSubmitIntent === "function"
 			) {
-				this.intents[intentCall.name].onSubmit(intentCall, currentInputValue);
+				this.intents[intentCall.name].onSubmitIntent(
+					intentCall,
+					currentInputValue
+				);
 			} else if (
 				intentCall.name === "other" &&
 				this.intents["other"] &&
-				typeof this.intents["other"].onSubmit === "function"
+				typeof this.intents["other"].onSubmitIntent === "function"
 			) {
-				this.intents["other"].onSubmit(intentCall, currentInputValue);
+				this.intents["other"].onSubmitIntent(intentCall, currentInputValue);
 			}
 		}
 
@@ -188,14 +191,14 @@ export class StatefulIntentCreator extends IntentCreator {
 
 	addIntent<T extends z.ZodType>(
 		intentName: string,
-		intent: IntentPartialOptional<T>
+		intent: StatefulIntentPartialOption<T>
 	): this {
 		let completeIntent: StatefulIntent<T> = {
 			onCleanup: () => {},
-			onSubmit: () => {},
+			onSubmitIntent: () => {},
 			description: "",
 			...intent,
-		}
+		};
 		this.intents[intentName] = completeIntent;
 		return this;
 	}

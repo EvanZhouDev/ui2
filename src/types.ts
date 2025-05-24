@@ -14,8 +14,8 @@ export type IntentCreatorConfig = {
 	onPartialIntent: (partialIntents: IntentCall[]) => void;
 	onLoadStart: () => void;
 	onLoadEnd: () => void;
-	onIntent: (intentCall: IntentCall, input?: string) => void;
-	onCleanup: (intentCall: IntentCall, input?: string) => void;
+	onIntent: (intentCall: IntentCall, input: string) => void;
+	onCleanup: (intentCall: IntentCall, input: string) => void;
 };
 
 export type UI2Config = {
@@ -30,22 +30,22 @@ export type UI2Config = {
 
 export type IntentPartialOptional<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
-	onIntent: (intentCall: IntentCall<T>, input?: string) => void;
+	onIntent: (intentCall: IntentCall<T>, input: string) => void;
 	description?: string;
-	onCleanup?: (intentCall: IntentCall<T>, input?: string) => void;
-}
+	onCleanup?: (intentCall: IntentCall<T>, input: string) => void;
+};
 
 export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
 	description: string;
-	onIntent: (intentCall: IntentCall<T>, input?: string) => void;
-	onCleanup: (intentCall: IntentCall<T>, input?: string) => void;
+	onIntent: (intentCall: IntentCall<T>, input: string) => void;
+	onCleanup: (intentCall: IntentCall<T>, input: string) => void;
 };
 
 export type OtherIntent = {
 	description?: string;
-	onIntent?: (intentCall: IntentCall, input?: string) => void;
-	onCleanup?: (intentCall: IntentCall, input?: string) => void;
+	onIntent?: (intentCall: IntentCall, input: string) => void;
+	onCleanup?: (intentCall: IntentCall, input: string) => void;
 };
 
 export type Intents = {
@@ -73,5 +73,10 @@ export type StatefulIntentCreatorConfig =
 
 export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =
 	Intent<T> & {
-		onSubmit: (intentCall: IntentCall, input?: string) => void;
+		onSubmitIntent: (intentCall: IntentCall<T>, input: string) => void;
 	};
+export type StatefulIntentPartialOption<
+	T extends z.ZodType = z.ZodObject<any>
+> = IntentPartialOptional<T> & {
+	onSubmitIntent?: (intentCall: IntentCall<T>, input: string) => void;
+};
