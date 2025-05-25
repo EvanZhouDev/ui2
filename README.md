@@ -1,8 +1,6 @@
 # UI2
 
-<video src="./docs/public/ui2-demo.mov" controls width="600">
-  Your browser does not support the video tag.
-</video>
+![UI2 Demo](./docs/public/ui2-demo.gif)
 
 > Introducing the **Unified Intent Interface**
 
