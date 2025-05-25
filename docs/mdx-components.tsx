@@ -6,7 +6,12 @@ import type { MDXComponents } from "mdx/types";
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
 	return {
 		...defaultMdxComponents,
-		...TabsComponents,
+		// Only include valid React components from TabsComponents
+		...Object.fromEntries(
+			Object.entries(TabsComponents).filter(
+				([, value]) => typeof value === "function" || (typeof value === "object" && value !== null && ("$$typeof" in value))
+			)
+		),
 		...components,
 	};
 }
