@@ -56,13 +56,13 @@ There are a few important things about submission:
 
 An instance of `StatefulIntentCreator` is returned, with many helpful functions that you can destructure out of it. Let's go through them:
 
-| Value Name      | Description                                                                                              |
-| --------------- | -------------------------------------------------------------------------------------------------------- |
-| `isLoading`     | Boolean state representing whether or not Intent processing is happening                                 |
-| `onSubmit`      | What should be called when the UI2 input box is submitted, triggering `onSubmit` on the current Intents. |
-| `inputValue`    | Allows directly controlling value of the input box                                                       |
-| `setInputValue` | Allows directly controlling value of the input box                                                       |
-| `onInputChange` | What should be called when your UI2 input box changes. Triggers processing intents, among other things.  |
+| Value Name          | Description                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| `isLoading`         | Boolean state representing whether or not Intent processing is happening                                 |
+| `handleSubmit`      | What should be called when the UI2 input box is submitted, triggering `onSubmit` on the current Intents. |
+| `inputValue`        | Allows directly controlling value of the input box                                                       |
+| `setInputValue`     | Allows directly controlling value of the input box                                                       |
+| `handleInputChange` | What should be called when your UI2 input box changes. Triggers processing intents, among other things.  |
 
 ### `isLoading`
 
@@ -76,9 +76,9 @@ These two are simple state management functions for the UI2 Input. They follow t
 
 Note that `setInputValue` is the raw method to change the input value, and does not come with any optimizations necessary when updating the UI2 Input box.
 
-If you are putting an `onChange` event for an input, you should instead use `onInputChange`
+If you are putting an `onChange` event for an input, you should instead use `handleInputChange`
 
-### `onInputChange`
+### `handleInputChange`
 
 This event listener of course updates the input value.
 
@@ -90,8 +90,8 @@ An example of using UI2's React hook could look like this:
 
 ```tsx
 "use client";
-import { useUI2 } from "ui2.js";
-import { cerebras } from "@ai-sdk/cerebras";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -105,10 +105,14 @@ export default function Page() {
 		}[]
 	>([]);
 
-	let { inputValue, onInputChange, onSubmit } = useUI2({
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
 		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
-		context: todos,
+		context: todos.filter(x => !x.preview),
 	})
 		.addIntent("addTodo", {
 			description: "Add a todo",
@@ -156,7 +160,7 @@ export default function Page() {
 								: x
 						)
 					);
-			}
+			},
 			onSubmit: ({ parameters }) =>
 				setTodos((prev) =>
 					prev.map((x) =>
@@ -180,7 +184,7 @@ export default function Page() {
 				<input
 					className="p-1 outline"
 					value={inputValue}
-					onChange={onInputChange}
+					onChange={(e) => handleInputChange(e.target.value)}
 				/>
 				<button className="p-1 outline" onClick={onSubmit}>
 					Submit

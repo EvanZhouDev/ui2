@@ -91,7 +91,7 @@ let cerebras = createCerebras({
 	apiKey: "API_KEY",
 });
 
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 });
 ```
@@ -145,7 +145,7 @@ export default function Page() {
 		apiKey: "API_KEY",
 	});
 
-	let { inputValue, onInputChange, onSubmit } = useUI2({
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
 		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
 		context: todos.filter((x) => !x.preview),
@@ -164,7 +164,7 @@ export default function Page() {
 				<input
 					className="p-1 outline"
 					value={inputValue}
-					onChange={onInputChange}
+					onChange={handleInputChange}
 				/>
 				<button className="p-1 outline" onClick={onSubmit}>
 					Submit
