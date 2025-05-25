@@ -2,6 +2,7 @@
 	"pages": [
 		"---Introduction---",
 		"installation",
+		"what-to-build",
 		"quick-start",
 		"react-quick-start",
 		"---Advanced Usage---",

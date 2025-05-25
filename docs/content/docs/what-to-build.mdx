@@ -1,0 +1,27 @@
+---
+title: What to Build with UI2
+description: What can you make with UI2?
+---
+
+UI2 is a powerful intent-detection framework. But starting off, it may be difficult to think of what to build, since it represents a rather large paradigm shift from standard ways of building UI.
+
+Here are a few key points to consider:
+
+- **It's Not a Replacement for Standard UI**: UI2 should always be used in addition to the "standard" UI (buttons, dropdowns, textboxes), and should never replace them. You should always give the user the ability to do things in the standard way, since it might be faster. Never only expose functionality through UI2 input, since that may be hidden and difficult to find.
+- **Not All Apps Work with UI2**: There are [3 categories of apps](#types-of-ui2-apps): One that should use UI2 mainly, one that should have both UI2 and standard interfaces, and one that should never use UI2.
+- **Tell the User What they can Do**: If you are building a UI2 app, always make sure to tell the user what functionality is available, since otherwise it can be hard to discover.
+- **Beyond the Textbox**: Currently, the `StatefulIntentCreator` orbits around the idea of the UI2 input, a textbox you type into. But, there's more options beyond that including [voice input](#beyond-the-textbox).
+
+## Types of UI2 Apps
+
+- **Fully UI2**: These apps should in theory work faster when using UI2 instead of the standard UI (although again, everything should be accessible still through standard UI). Here are some examples:
+  - **Todo App**: Since you are mostly inputting todos or modifying them, it's much faster to mainly use UI2
+  - **Timer App**: Setting a timer involves many steps that can be simplified with Intent detection
+- **Hybrid UI2**: These apps should have UI2 available, but the user may not use it all the time. They can choose to use it if they believe it'll be faster to do what they want to do. Here are some examples:
+  - **Calendar App**: It can be fast to schedule a chunk of time via Natural Language, but something like moving an event may still be easier manually.
+  - **Photo Editing**: It can be easy to apply a filter through Natural Language, but achieving detailed controls can still be faster manually
+- **No UI2**: Some apps don't make sense at all with UI2, especially if it's faster to navigate manually.
+
+## Beyond the Textbox
+
+While the current `StatefulIntentCreator` and thus React hook are built for text input, UI2 can work well, if not better with voice input. This would require another extension of `IntentCreator`, but this type of input can work particularly well on mobile or AR/VR devices where it may be difficult to type.
