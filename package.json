@@ -37,5 +37,23 @@
 	"type": "module",
 	"devDependencies": {
 		"tsup": "^8.4.0"
-	}
+	},
+	"directories": {
+		"doc": "docs",
+		"example": "examples"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/EvanZhouDev/ui2.git"
+	},
+	"keywords": [
+		"intent",
+		"ui"
+	],
+	"author": "EvanZhouDev",
+	"license": "AGPL-3.0-only",
+	"bugs": {
+		"url": "https://github.com/EvanZhouDev/ui2/issues"
+	},
+	"homepage": "https://github.com/EvanZhouDev/ui2#readme"
 }
