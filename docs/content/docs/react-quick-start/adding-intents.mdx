@@ -288,6 +288,12 @@ However, note that it's perfectly fine to use `parameters.id` as well!
 
 ## Final Code
 
+<Callout>
+	The final code is also available on GitHub in the `/examples` folder. [Check
+	it out
+	here](https://github.com/EvanZhouDev/ui2/tree/main/examples/react-quick-start).
+</Callout>
+
 This is your final UI2 code for our todo app.
 
 ```jsx
@@ -362,7 +368,7 @@ export default function Page() {
 								: x
 						)
 					);
-			}
+			},
 			onSubmit: ({ parameters }) =>
 				setTodos((prev) =>
 					prev.map((x) =>
