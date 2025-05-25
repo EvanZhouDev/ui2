@@ -20,10 +20,10 @@ Feel free to review the lifecycle of a UI2 intent in the [prior sections](/react
 In order to add an intent, we simply call `.addIntent()` on the `useUI2()` hook, with the name of the intent, and the parameters.
 
 ```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
-	context: todos,
+	context: todos.filter((x) => !x.preview),
 }).addIntent("addTodo", {
 	// config here...
 });
@@ -32,10 +32,10 @@ let { inputValue, onInputChange, onSubmit } = useUI2({
 We'll start by defining the intent description, and the parameters, like such:
 
 ```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
-	context: todos,
+	context: todos.filter((x) => !x.preview),
 }).addIntent("addTodo", {
 	description: "Add a todo",
 	parameters: z.object({
@@ -67,10 +67,10 @@ In the main `onIntent`, we'll create a new reminder, with the `preview` status s
 </Callout>
 
 ```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
-	context: todos,
+	context: todos.filter((x) => !x.preview),
 }).addIntent("addTodo", {
 	description: "Add a todo",
 	parameters: z.object({
@@ -120,16 +120,17 @@ Note that all intent calls come with a `id` field. This helps internally track w
 This is where our `id` comes in handy. Instead of referring to our Todo with the name, which might be inaccurate, we can simply use the id that came with the UI2 Intent Identification.
 
 <Callout title="UI2 Intent ID">
-	These intent IDs carry throughout the Intent's lifecycle. As such, it's valuable to use them when cleaning up.
+	These intent IDs carry throughout the Intent's lifecycle. As such, it's
+	valuable to use them when cleaning up.
 </Callout>
 
 What we need to do now when "cleaning up" our intent is to essentially undo what we did in the `onIntent`. In this case, it's simply removing the todo.
 
 ```tsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
-	context: todos,
+	context: todos.filter((x) => !x.preview),
 }).addIntent("addTodo", {
 	description: "Add a todo",
 	parameters: z.object({
@@ -161,10 +162,10 @@ Finally, we will define the `onSubmit` callback. In this function, we'll just ch
 Here's our final code so far:
 
 ```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
-	context: todos,
+	context: todos.filter((x) => !x.preview),
 }).addIntent("addTodo", {
 	description: "Add a todo",
 	parameters: z.object({
@@ -219,7 +220,7 @@ To start, think about the lifecycle. Then, implement it!
 					)
 				);
 			},
-			onSubmit: ({ parameters, id }) =>
+			onCleanup: ({ parameters, id }) =>
 				setTodos((prev) =>
 						prev.map((x) =>
 							x.id === parameters.id
@@ -262,7 +263,7 @@ In fact, it's reasonable to rename `parameters.id` like this:
 					)
 				);
 			},
-			onSubmit: ({ parameters, id }) =>
+			onCleanup: ({ parameters, id }) =>
 				setTodos((prev) =>
 						prev.map((x) =>
 							x.id === parameters.idToComplete
@@ -291,8 +292,8 @@ This is your final UI2 code for our todo app.
 
 ```jsx
 "use client";
-import { useUI2 } from "ui2-kit/react";
-import { cerebras } from "@ai-sdk/cerebras";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -306,10 +307,14 @@ export default function Page() {
 		}[]
 	>([]);
 
-	let { inputValue, onInputChange, onSubmit } = useUI2({
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
 		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
-		context: todos,
+		context: todos.filter(x => !x.preview),
 	})
 		.addIntent("addTodo", {
 			description: "Add a todo",

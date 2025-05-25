@@ -101,6 +101,7 @@ ${text}
 
 	public setContext(context: object) {
 		this.config.context = context;
+		return this;
 	}
 
 	public removeIntent(intentName: string) {

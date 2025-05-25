@@ -1,7 +1,7 @@
 {
 	"pages": [
 		"---Introduction---",
-		"about-ui2",
+		"installation",
 		"quick-start",
 		"react-quick-start",
 		"---Advanced Usage---",
@@ -13,6 +13,7 @@
 		"statefulIntentCreator",
 		"react-hook-reference",
 		"---Development---",
+		"branding",
 		"contributing"
 	]
 }

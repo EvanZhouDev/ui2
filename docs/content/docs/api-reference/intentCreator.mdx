@@ -156,6 +156,24 @@ The `other` intent is unique, since it acts as a catch-all for any intent that i
 | `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.           |
 | `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is no longer detected.   |
 
+### `setContext`
+
+```ts
+public setContext(context: object): this
+```
+
+Simply sets `this.config.context` to the parameter.
+
+Helps if you wish manually reset context to a certain value, or if you don't want to deal with object references.
+
+### `removeIntent`
+
+```ts
+public removeIntent(intentName: string): this
+```
+
+Removes the intent with the name `intentName`. Throws an error if there is no such intent.
+
 ## Conclusion
 
 Again, recall that `IntentCreator` is an internal API.

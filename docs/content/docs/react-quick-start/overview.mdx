@@ -4,7 +4,9 @@ description: What are we building?
 ---
 
 <Callout>
-If you haven't already, it can be helpful to read the [Core Quick Start](/quick-start/overview), but this course will also make sense without it.
+	If you haven't already, it can be helpful to read the [Core Quick
+	Start](/quick-start/overview), but this course will also make sense without
+	it.
 </Callout>
 
 In this Quick Start guide, we'll be creating our first UI2 application, with Next.js and React.
@@ -32,8 +34,8 @@ This is the final code we will be writing:
 
 ```tsx
 "use client";
-import { useUI2 } from "ui2-kit/react";
-import { cerebras } from "@ai-sdk/cerebras";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -47,10 +49,14 @@ export default function Page() {
 		}[]
 	>([]);
 
-	let { inputValue, onInputChange, onSubmit } = useUI2({
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
 		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
-		context: todos,
+		context: todos.filter(x => !x.preview),
 	})
 		.addIntent("addTodo", {
 			description: "Add a todo",
@@ -122,7 +128,7 @@ export default function Page() {
 				<input
 					className="p-1 outline"
 					value={inputValue}
-					onChange={onInputChange}
+					onChange={(e) => handleInputChange(e.target.value)}
 				/>
 				<button className="p-1 outline" onClick={onSubmit}>
 					Submit

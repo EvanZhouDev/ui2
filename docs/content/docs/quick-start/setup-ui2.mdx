@@ -5,14 +5,26 @@ description: Set up everything you need to use UI2
 
 Let's start by installing UI2, available on NPM or your favorite package manager.
 
-```bash
-npm i ui2-kit
+```bash tab="NPM"
+npm i ui2-sdk
+```
+
+```bash tab="PNPM"
+pnpm add ui2-sdk
+```
+
+```bash tab="Bun"
+bun add ui2-sdk
+```
+
+```bash tab="Yarn"
+yarn add ui2-sdk
 ```
 
 Now, simply import `createUI2`, and call it for now. This is how we'll be building our UI2 app today.
 
 ```ts
-import { createUI2 } from "ui2-kit";
+import { createUI2 } from "ui2-sdk";
 
 let { identifyIntent } = createUI2({});
 ```
@@ -32,7 +44,7 @@ UI2 uses Structured Output to guarentee that your Intent parameter schemas are s
 After you have your model set up, it should look something like this:
 
 ```ts
-import { createUI2 } from "ui2-kit";
+import { createUI2 } from "ui2-sdk";
 import { cerebras } from "@ai-sdk/cerebras";
 
 let { identifyIntent } = createUI2({

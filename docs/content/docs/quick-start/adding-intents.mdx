@@ -8,7 +8,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 The next step is to actually define our intents. First, here's the code for one such intent:
 
 ```ts
-import { createUI2 } from "ui2-kit";
+import { createUI2 } from "ui2-sdk";
 import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
 
@@ -93,7 +93,7 @@ Now, based on this, try to implement a `square` intent which takes a parameter t
 Here's the final code with both intents:
 
 ```ts
-import { createUI2 } from "ui2-kit";
+import { createUI2 } from "ui2-sdk";
 import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
 

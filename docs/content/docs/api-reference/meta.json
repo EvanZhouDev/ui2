@@ -8,7 +8,8 @@
 		"addIntent",
 		"addOther",
 		"identifyIntent",
-		"statefulIntentCreator"
+		"statefulIntentCreator",
+		"other-createui2-methods"
 	],
 	"defaultOpen": true
 }

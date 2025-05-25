@@ -46,11 +46,11 @@ It's best to adapt this delay to your audience. For example:
 The default delay is 300ms (`debounceDelay: 300`) but you can change this property by passing it into the `useUI2` config, as such:
 
 ```ts
-let { inputValue, onInputChange, onSubmit } = useUI2({
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
 	model: cerebras("llama-3.3-70b"),
 	systemPrompt: "This is a todo app.",
 	debounceDelay: 500, // In ms
-	context: todos,
+	context: todos.filter(x => !x.preview),
 });
 ```
 

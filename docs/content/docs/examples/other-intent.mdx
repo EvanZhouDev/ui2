@@ -6,13 +6,14 @@ description: Learn how to use the catch-all Other intent and its special feature
 The `other` intent is unique. It acts as a catch-all intent for cases where no other intent can be matched.
 
 <Callout type="warn">
-You cannot name a normal intent `"other"`. If you wish to manipulate properties on the `other` intent, you must use the `addOther` method.
+	You cannot name a normal intent `"other"`. If you wish to manipulate
+	properties on the `other` intent, you must use the `addOther` method.
 </Callout>
 
 Using the `other` intent could look something like this:
 
 ```ts
-import { createUI2 } from "ui2-kit";
+import { createUI2 } from "ui2-sdk";
 import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
 
@@ -35,7 +36,7 @@ let { identifyIntent } = createUI2({
 	})
 	.addOther({
 		description: "Use this for any other mathematical operation",
-        onIntent: (intentCall) => console.log("That operation has no intent!")
+		onIntent: (intentCall) => console.log("That operation has no intent!"),
 	});
 
 identifyIntent("what is log base 2 of 4?");
@@ -59,10 +60,10 @@ For one, you cannot pass in a name.
 
 Furthermore, in the configuration, you can only pass in:
 
-* `description`
-* `onIntent`
-* `onCleanup`
-* `onSubmit` (with React hook)
+- `description`
+- `onIntent`
+- `onCleanup`
+- `onSubmit` (with React hook)
 
 The signature of these callbacks are identical.
 

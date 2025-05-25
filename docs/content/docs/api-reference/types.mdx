@@ -15,8 +15,8 @@ These types are core to UI2, and are the basic building blocks of all UI2 applic
 export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
 	description: string;
-	onIntent: (intentCall: IntentCall<T>, input?: string) => void;
-	onCleanup: (intentCall: IntentCall<T>, input?: string) => void;
+	onIntent: (intentCall: IntentCall<T>, input: string) => void;
+	onCleanup: (intentCall: IntentCall<T>, input: string) => void;
 };
 ```
 
@@ -56,7 +56,7 @@ If you are using UI2 with React, you are actually using the Stateful version of 
 ```ts
 export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =
 	Intent<T> & {
-		onSubmit: (intentCall: IntentCall, input?: string) => void;
+		onSubmit: (intentCall: IntentCall<T>, input: string) => void;
 	};
 ```
 

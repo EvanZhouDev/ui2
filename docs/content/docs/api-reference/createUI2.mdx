@@ -50,7 +50,6 @@ However, if you do not want to use Vercel AI SDK, you can also directly use a ob
 
 This helps specify any provider that is compliant with OpenAI schema.
 
-
 ### `systemPrompt`
 
 These instructions are given to AI to guide its intent identification.
@@ -114,3 +113,13 @@ let { identifyIntent } = createUI2({
     onLoadEnd: () => console.log("Loading finished"),
 });
 ```
+
+## Methods
+
+`IntentCreator`, and thus `createUI2` returns various methods that are useful to manage your intent interface. All of these methods return a reference to the `IntentCreator` so you have two ways to call them.
+
+For one, you can destructure them from `createUI2`, and use them like `identifyIntent`.
+
+You can also choose to directly chain them under `createUI2`, such as for `.addIntent()`.
+
+There is a separate documentation page for [`addIntent`](/api-reference/addIntent), [`addOther`](/api-reference/addOther), and [`identifyIntent`](/api-reference/identifyIntent), and also another page for the rest of the miscellaneous methods.
