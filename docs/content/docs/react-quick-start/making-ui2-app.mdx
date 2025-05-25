@@ -25,7 +25,8 @@ npx create-next-app@latest
 Walk through the app creation steps.
 
 <Callout title="TypeScript Support">
-UI2 is written in TypeScript and has many amazing features only available in TypeScript.
+	UI2 is written in TypeScript and has many amazing features only available in
+	TypeScript.
 </Callout>
 
 We'll be using TypeScript and Tailwind CSS.
@@ -62,6 +63,11 @@ export default function Page() {
 	);
 }
 ```
+
+<Callout>
+	Note how we are importing the `useUI2` hook from `ui2-sdk/react` instead of
+	just `ui2-sdk`. This helps organize the features of UI2.
+</Callout>
 
 </Step>
 </Steps>
