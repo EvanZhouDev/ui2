@@ -1,6 +1,6 @@
 {
-	"name": "ui2-kit",
-	"version": "0.1.0",
+	"name": "ui2-sdk",
+	"version": "1.0.0",
 	"description": "Build AI-powered, intent-driven UI with ease.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
