@@ -13,7 +13,13 @@ Being abbreviated as "UII", the name **UI2** was eventually given meaning simult
 
 In text, UI2 should always be written as `UI2`, **not** `ui2`, `uii`, `UI Two`, and so on.
 
-In code, this pattern should also be followed, although standard variable casing takes precedent. For example:
+In code, this pattern should also be ideally followed, although there are reasonable exceptions (such as the fact that standard naming conventions take precedent). For example:
+
+| ✅ Do                               | ❌ Don't Do                                                       |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| A function written as `createUI2()` | `createUi2()` or `createui2()`                                    |
+| A function written as `ui2()`       | `UI2()` (as capitalized first letter is reserved for class)       |
+| A package name written as `ui2-sdk` | `UI2-sdk`, if your package manager prefers lowercase first letter |
 
 - If you have a function like `createUI2`, it should **not** be written `createUi2`
 - If you have a function simply named `ui2()`, it should **not** be written `UI2()`
