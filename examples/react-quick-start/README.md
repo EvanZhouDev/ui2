@@ -1,4 +1,4 @@
-# Quick Start
+# React Quick Start
 
 This is the source code for the [React Quick Start example on the UI2 Documentation](https://ui2-docs.vercel.app/react-quick-start/overview).
 
