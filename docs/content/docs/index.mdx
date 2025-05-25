@@ -1,26 +1,79 @@
 ---
 title: UI2 Documentation
-description: Learn how to use UI2
+description: Introducing the Unified Intent Interface
 ---
 
+*A UI2-powered todo app, showing **Intent Detection** and **Instant Preview**:*
+
+![UI2 Demo](/ui2-demo.gif)
+
+
+UI2 seeks to directly convert user intention into action. Think if an assistant like Siri was implemented directly into an application—but you can type to it, and due to its deep integration, it's accurate, powerful, and _fast_.
+
+And not only that, you can see exactly what that assistant would do as you are typing.
+
+## The Problem
+
+The idea of the User Interface has always been the same since it's creation.
+
+1. You have an **intention** to do something
+2. You formulate how to **translate** that Intention into Actions
+3. You take those **actions** on the UI to achieve your goal
+
+But imagine a world where there is no barrier between **intention** and **action**. One where you can directly express your **Intent**—and have the computer handle the rest for you.
+
+That very _idea_ is UI2.
 
 ## What is UI2?
 
-UI2, or the **Unified Intent Interface** is a framework for a natural-language interface to any application. It merges all the intents in your app—from searching, taking action, and more—into a single text interface with live preview of your actions, so you can see exactly what you are doing before you even press submit.
+UI2, or the **Unified Intent Interface** is a framework for a natural-language interface to any application.
 
-## Philosophy
+It is powered by the idea of **Intent Identification**, merging all the intents in your app—searching, taking action, and more—into a single natural language interface.
+
+UI2 can be described with four core ideas:
 
 1. **Unification**: Search, taking action, and everything else you can do on an application should not be separate interfaces, but rather unified into one.
 2. **Intent Detection**: The key point in combining these interfaces is identifying the user intent, now possible through LLMs
-3. **Instant Preview**: UI2 enables the idea of instant intent detection. Imagine autocomplete for _actions_—not just words, in which you can "preview-before-committing"
+3. **Context**: Not only is intent detection based off of the text that you are typing, it also draws context from everything in your app—Allowing more powerful and more accurate intents.
+4. **Instant Preview**: Imagine autocomplete for _actions_—not just words, in which you can "preview-before-committing." [Learn more](#instant-preview-ui2-vs-chatbot) about this key principle of UI2.
 
-## Get Started
+## Instant Preview: UI2 vs Chatbot
+
+The idea of converting natural language into action is something existing chatbots can already do. But UI2 hopes to take this a step further by addressing a key issue with existing implementations: **Uncertainty**.
+
+Possibly the most important principle of UI2 is **Instant Preview**: You can see the intents detected as you type.
+
+Unlike a chatbot with which you are not sure about what it could do, UI2 gives you the constant feedback of standard UI while achieving the fluidity of the natural language interface.
+
+## What's Available
+
+<Callout>
+	UI2 is currently only available as a JavaScript/TypeScript library.
+</Callout>
+
+UI2 is full of various features to help you identify intents for your app.
+
+1. **Standalone Library**: You can use UI2 to directly identify intents. No UI or framework attached.
+2. **Stateful Implementation**: You can use a Stateful version of UI2, built for frontend, to link to any input box with debounce and async processing built in.
+3. **React Hook**: Built on the Stateful Implementation, you can use the React hook to easily connect to your projects.
+
+## Building with UI2
+
+Intent identification is undoubtedly the future of the User Interface.
+
+But the most important part is what you can build with it. So, let's get right into it.
 
 <Cards>
-	<Card title="Quick Start" href="/docs/quick-start/making-ui2-app">
-		Get started by building a quick UI2 reminders app
+	<Card title="Intent Identification Quick Start" href="/quick-start/overview">
+		Identify your first intents with the UI2
 	</Card>
-	<Card title="API Reference" href="/docs/api-reference">
-		Or, learn more about the UI2 API
+	<Card title="Intent Identification API" href="/api-reference-overview">
+		Explore the powerful and extensible UI2 API
+	</Card>
+	<Card title="UI2 for React Quick Start" href="/react-quick-start/overview">
+		Build a UI2 Reminders app
+	</Card>
+	<Card title="UI2 for React API" href="/react-hook-reference">
+		Explore the custom UI2 API for React
 	</Card>
 </Cards>

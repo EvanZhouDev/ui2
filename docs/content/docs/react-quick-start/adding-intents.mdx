@@ -1,0 +1,400 @@
+---
+title: Adding Intents
+description: Adding Intents to your UI2 app
+---
+
+Now, it's time to add intents to our app.
+
+Let's start with the `addTodo` intent. Remember this is what we wanted it to do:
+
+- `addTodo`
+  - **Parameters**: Name of the todo
+  - `onIntent`: Show a preview of the new todo, to be added
+  - `onCleanup`: Remove the preview
+  - `onSubmit`: Actually add the new todo to the list
+
+Feel free to review the lifecycle of a UI2 intent in the [prior sections](/react-quick-start/thinking-in-ui2).
+
+## Basic Intent Setup
+
+In order to add an intent, we simply call `.addIntent()` on the `useUI2()` hook, with the name of the intent, and the parameters.
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+}).addIntent("addTodo", {
+	// config here...
+});
+```
+
+We'll start by defining the intent description, and the parameters, like such:
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+}).addIntent("addTodo", {
+	description: "Add a todo",
+	parameters: z.object({
+		name: z.string(),
+	}),
+});
+```
+
+The parameters are defined using [Zod](https://zod.dev/).
+
+They must be contained in a `z.object`, but anything inside is up to you. Powered by
+Structured Output, it is guarenteed the AI's output will match your schema.
+
+<Callout title="Using Zod">
+	You can even use `.describe("")` to describe your types to the AI, or use
+	other advanced features like Enumerators. However, to prevent confusion, it's
+	still best to keep the schema relatively simple.
+</Callout>
+
+## `onIntent` Setup
+
+Next, we will define the `onIntent` callback.
+
+In the main `onIntent`, we'll create a new reminder, with the `preview` status set to `true`. In this way, the user can see a live preview of the new todo (handled in the UI), before they actually add it to the list.
+
+<Callout title="Preview">
+	The idea of previewing-before-committing is a core concept of UI2. Your apps
+	should follow this pattern.
+</Callout>
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+}).addIntent("addTodo", {
+	description: "Add a todo",
+	parameters: z.object({
+		name: z.string(),
+	}),
+	onIntent: ({ parameters, id }) => {
+		setTodos((prev) => [
+			...prev,
+			{
+				id,
+				name: parameters.name,
+				completed: false,
+				preview: true,
+			},
+		]);
+	},
+});
+```
+
+<Callout title="Destructuring Parameters">
+	If you've come from the [Core Quick Start](/quick-start/overview), you've likely seen a different syntax.
+
+    Remember that the first parameter of `onIntent` is of an `IntentCall` type. You can make this a variable like such:
+
+    ```ts
+    onIntent: (intentCall) => {
+    	setTodos((prev) => [
+    		...prev,
+    		{
+    			intentCall.id,
+    			name: intentCall.parameters.name,
+    			completed: false,
+    			preview: true,
+    		},
+    	]);
+    }
+    ```
+
+    Or use destructuring just like you see above.
+
+</Callout>
+
+Note that all intent calls come with a `id` field. This helps internally track which intent calls are going on, but they can also be used as a way to identify specific actions that are being taken, such as the todos created in this case.
+
+## `onCleanup` Setup
+
+This is where our `id` comes in handy. Instead of referring to our Todo with the name, which might be inaccurate, we can simply use the id that came with the UI2 Intent Identification.
+
+<Callout title="UI2 Intent ID">
+	These intent IDs carry throughout the Intent's lifecycle. As such, it's
+	valuable to use them when cleaning up.
+</Callout>
+
+What we need to do now when "cleaning up" our intent is to essentially undo what we did in the `onIntent`. In this case, it's simply removing the todo.
+
+```tsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+}).addIntent("addTodo", {
+	description: "Add a todo",
+	parameters: z.object({
+		name: z.string(),
+	}),
+	onIntent: ({ parameters, id }) => {
+		setTodos((prev) => [
+			...prev,
+			{
+				id,
+				name: parameters.name,
+				completed: false,
+				preview: true,
+			},
+		]);
+	},
+	onCleanup: ({ parameters, id }) => {
+		setTodos((prev) => prev.filter((x) => x.id !== id));
+	},
+});
+```
+
+Again, note how we are referencing with the todo ID.
+
+## `onSubmit` Setup
+
+Finally, we will define the `onSubmit` callback. In this function, we'll just change the preview status of the todo to `false`, essentially adding it.
+
+Here's our final code so far:
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+}).addIntent("addTodo", {
+	description: "Add a todo",
+	parameters: z.object({
+		name: z.string(),
+	}),
+	onIntent: ({ parameters, id }) => {
+		setTodos((prev) => [
+			...prev,
+			{
+				id,
+				name: parameters.name,
+				completed: false,
+				preview: true,
+			},
+		]);
+	},
+	onCleanup: ({ parameters, id }) => {
+		setTodos((prev) => prev.filter((x) => x.id !== id));
+	},
+	onSubmit: ({ id }) =>
+		setTodos((prev) =>
+			prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
+		),
+});
+```
+
+Recall that submitting refers to the action of the user "confirming" their intent.
+
+There are a few important things about submission:
+
+1. **There is no cleanup**: Cleanup is _not_ called when submitting
+2. **Operate on your preview**: Due to that, you should use a simple operation to "confirm" your preview instead of adding new elements to state or otherwise
+
+## Creating `completeTodo`
+
+Try to make the `completeTodo` intent with everything that you've learned so far.
+
+To start, think about the lifecycle. Then, implement it!
+
+```tsx
+.addIntent("completeTodo", {
+			description: "complete a todo",
+			parameters: z.object({
+				id: z.string(),
+			}),
+			onIntent: ({ parameters }) => {
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: true, completed: true }
+							: x
+					)
+				);
+			},
+			onCleanup: ({ parameters, id }) =>
+				setTodos((prev) =>
+						prev.map((x) =>
+							x.id === parameters.id
+								? { ...x, preview: false, completed: false }
+								: x
+						)
+					),
+			onSubmit: ({ parameters, id }) =>
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: false, completed: true }
+							: x
+					)
+				),
+		});
+```
+
+Note that this is very similar to our `addTodo` intent, and follows a similar lifecycle.
+
+However, note the difference between `parameters.id` and the `id` we're receiving directly from the intent call:
+
+- `id` in the destructured object refers to the `id` associated with this particular intent call
+- `parameters.id` refers to the `id` that the AI has generated, based on what it knows from the context of the todos
+
+In fact, it's reasonable to rename `parameters.id` like this:
+
+```tsx
+.addIntent("completeTodo", {
+			description: "complete a todo",
+			parameters: z.object({
+				idToComplete: z.string(),
+			}),
+			onIntent: ({ parameters }) => {
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.idToComplete
+							? { ...x, preview: true, completed: true }
+							: x
+					)
+				);
+			},
+			onCleanup: ({ parameters, id }) =>
+				setTodos((prev) =>
+						prev.map((x) =>
+							x.id === parameters.idToComplete
+								? { ...x, preview: false, completed: false }
+								: x
+						)
+					),
+			onSubmit: ({ parameters, id }) =>
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.idToComplete
+							? { ...x, preview: false, completed: true }
+							: x
+					)
+				),
+		});
+```
+
+Now, you can see the difference more clearly.
+
+However, note that it's perfectly fine to use `parameters.id` as well!
+
+## Final Code
+
+This is your final UI2 code for our todo app.
+
+```jsx
+"use client";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
+import { useState } from "react";
+import { z } from "zod";
+
+export default function Page() {
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+			preview: boolean;
+		}[]
+	>([]);
+
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
+		model: cerebras("llama-3.3-70b"),
+		systemPrompt: "This is a todo app.",
+		context: todos.filter(x => !x.preview),
+	})
+		.addIntent("addTodo", {
+			description: "Add a todo",
+			parameters: z.object({
+				name: z.string(),
+			}),
+			onIntent: ({ parameters, id }) => {
+				setTodos((prev) => [
+					...prev,
+					{
+						id,
+						name: parameters.name,
+						completed: false,
+						preview: true,
+					},
+				]);
+			},
+			onCleanup: ({parameters, id}) => {
+				setTodos((prev) => prev.filter((x) => x.id !== id))
+			}
+			onSubmit: ({ id }) =>
+				setTodos((prev) =>
+					prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
+				),
+		})
+		.addIntent("completeTodo", {
+			description: "complete a todo",
+			parameters: z.object({
+				id: z.string(),
+			}),
+			onIntent: ({ parameters }) => {
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: true, completed: true }
+							: x
+					)
+				);
+			},
+			onCleanup: ({ parameters }) => {
+				setTodos((prev) =>
+						prev.map((x) =>
+							x.id === parameters.id
+								? { ...x, preview: false, completed: false }
+								: x
+						)
+					);
+			}
+			onSubmit: ({ parameters }) =>
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: false, completed: true }
+							: x
+					)
+				),
+		});
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input
+					className="p-1 outline"
+					value={inputValue}
+					onChange={handleInputChange}
+				/>
+				<button className="p-1 outline" onClick={handleSubmit}>
+					Submit
+				</button>
+			</div>
+		</div>
+	);
+}
+```
+
+In the final section, let's see how we can try out our application.

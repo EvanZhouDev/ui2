@@ -1,0 +1,198 @@
+---
+title: React Hook Reference
+description: A custom hook based off StatefulIntentCreator, for React
+---
+
+<Callout title="Prerequisites">
+	It is highly recommended that you read the [UI2 Core API
+	Reference](/api-reference-overview) and the [StatefulIntentCreator
+	Reference](/statefulIntentCreator) first before reading this.
+</Callout>
+
+While the `StatefulIntentCreator` is not intended to be directly used, there is a **React Hook** which directly helps you use `StatefulIntentCreator` with React.
+
+It automatically creates the `StatefulIntentCreator` instance, but it also helps you create states for loading, input box, and more.
+
+It also binds your context to the class, as well as uses a `ref` to that class, ensuring it's always up-to-date.
+
+## What the React Hook does
+
+The `StatefulIntentCreator` helps you manage many things with your UI2 app including:
+
+- **UI2 Input**: This input is where the user expresses their intents
+- **Submission**: An action for the user to confirm their intention
+- **Loading**: You can access a state to check whether the AI is loading
+- **And many other async processes**: You just have to define the intents—UI2 handles the rest
+
+Due to this, you simply have to hook up a few states returned from the hook to your app to get a fully-functional UI2 React app in minutes.
+
+## Configuration
+
+The configuration for the React API is identical to that of `createUI2`. Consult [`createUI2` documentation for more information](/api-reference/createUI2) about each of the values.
+
+| Value Name        | Type                                               | Description                                                  |
+| :---------------- | :------------------------------------------------- | :----------------------------------------------------------- |
+| `model`           | `LanguageModel` or Model Configuration             | Configure the model to use with UI2.                         |
+| `systemPrompt`    | `string`                                           | Additional instructions for the AI.                          |
+| `context`         | `object`                                           | Context for intent identification                            |
+| `onLoadStart`     | `() => void`                                       | Called when AI loading startsonintent-and-onsubmit-options). |
+| `onLoadEnd`       | `() => void`                                       | Called when AI loading ends                                  |
+| `onPartialIntent` | `(partialIntents: IntentCall[]) => void;`          | Called on each stream part for the intent.                   |
+| `onIntent`        | `(intentCall: IntentCall, input?: string) => void` | Called when any full intent is detected                      |
+| `onCleanup`       | `(intentCall: IntentCall, input?: string) => void` | Called when any full Intent is cleaned up                    |
+
+## Adding Intents
+
+Furthermore, the process of adding intents is also identical. You will use the `addIntent` and `addOther` methods.
+
+The only difference is that now there is a `onSubmit` event listener that you can pass in. This event listener is called when that specific intent is identified, and the Submit function is called.
+
+There are a few important things about submission:
+
+1. **There is no cleanup**: Cleanup is _not_ called when submitting
+2. **Operate on your preview**: Due to that, you should use a simple operation to "confirm" your preview instead of adding new elements to state or otherwise.
+
+## Return Value
+
+An instance of `StatefulIntentCreator` is returned, with many helpful functions that you can destructure out of it. Let's go through them:
+
+| Value Name          | Description                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------------------------------- |
+| `isLoading`         | Boolean state representing whether or not Intent processing is happening                                 |
+| `handleSubmit`      | What should be called when the UI2 input box is submitted, triggering `onSubmit` on the current Intents. |
+| `inputValue`        | Allows directly controlling value of the input box                                                       |
+| `setInputValue`     | Allows directly controlling value of the input box                                                       |
+| `handleInputChange` | What should be called when your UI2 input box changes. Triggers processing intents, among other things.  |
+
+### `isLoading`
+
+This is a boolean representing whether AI is currently processing intents. This can be used to show the user a loading animation.
+
+Due to the philosophy of UI2, it is **not** recommended to make loading blocking, and that doesn't make any sense. Rather, the user should have an idea of when it is loading but be able to continue expressing their intent.
+
+### `inputValue` and `setInputValue`
+
+These two are simple state management functions for the UI2 Input. They follow traditional React state function rules.
+
+Note that `setInputValue` is the raw method to change the input value, and does not come with any optimizations necessary when updating the UI2 Input box.
+
+If you are putting an `onChange` event for an input, you should instead use `handleInputChange`
+
+### `handleInputChange`
+
+This event listener of course updates the input value.
+
+However, it also does a few other things in the Stateful API to manage asynchronous handling including cache validation and more for submitting.
+
+## Example
+
+An example of using UI2's React hook could look like this:
+
+```tsx
+"use client";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
+import { useState } from "react";
+import { z } from "zod";
+
+export default function Page() {
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+			preview: boolean;
+		}[]
+	>([]);
+
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
+		model: cerebras("llama-3.3-70b"),
+		systemPrompt: "This is a todo app.",
+		context: todos.filter(x => !x.preview),
+	})
+		.addIntent("addTodo", {
+			description: "Add a todo",
+			parameters: z.object({
+				name: z.string(),
+			}),
+			onIntent: ({ parameters, id }) => {
+				setTodos((prev) => [
+					...prev,
+					{
+						id,
+						name: parameters.name,
+						completed: false,
+						preview: true,
+					},
+				]);
+			},
+			onCleanup: ({parameters, id}) => {
+				setTodos((prev) => prev.filter((x) => x.id !== id))
+			}
+			onSubmit: ({ id }) =>
+				setTodos((prev) =>
+					prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
+				),
+		})
+		.addIntent("completeTodo", {
+			description: "complete a todo",
+			parameters: z.object({
+				id: z.string(),
+			}),
+			onIntent: ({ parameters }) => {
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: true, completed: true }
+							: x
+					)
+				);
+			},
+			onCleanup: ({ parameters }) => {
+				setTodos((prev) =>
+						prev.map((x) =>
+							x.id === parameters.id
+								? { ...x, preview: false, completed: false }
+								: x
+						)
+					);
+			},
+			onSubmit: ({ parameters }) =>
+				setTodos((prev) =>
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: false, completed: true }
+							: x
+					)
+				),
+		});
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input
+					className="p-1 outline"
+					value={inputValue}
+					onChange={(e) => handleInputChange(e.target.value)}
+				/>
+				<button className="p-1 outline" onClick={onSubmit}>
+					Submit
+				</button>
+			</div>
+		</div>
+	);
+}
+```
+
+Check out the React Quick Start to walk through building this app.

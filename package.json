@@ -1,15 +1,27 @@
 {
-	"name": "ui2.js",
-	"version": "0.1.0",
+	"name": "ui2-sdk",
+	"version": "1.0.0",
+	"description": "Build AI-powered, intent-driven UI with ease.",
 	"main": "dist/index.js",
-	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
+			"types": "./dist/index.d.ts"
+		},
+		"./react": {
+			"import": "./dist/react/index.js",
+			"require": "./dist/react/index.cjs",
+			"types": "./dist/react/index.d.ts"
+		}
+	},
 	"files": [
-		"dist"
+		"dist",
+		"react/dist"
 	],
 	"scripts": {
-		"build": "npx tsup index.ts --dts",
-		"dev": "npx tsup index.ts --dts --watch"
+		"build": "npx tsup"
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "^1.3.16",

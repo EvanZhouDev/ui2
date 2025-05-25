@@ -1,12 +1,19 @@
 {
-	"title": "Quick Start",
 	"pages": [
 		"---Introduction---",
-		"what-is-ui2",
+		"installation",
 		"quick-start",
+		"react-quick-start",
+		"---Advanced Usage---",
+		"advanced-usage-overview",
+		"examples",
 		"---API Reference---",
+		"api-reference-overview",
 		"api-reference",
-		"useUI2",
-		"addIntent"
+		"statefulIntentCreator",
+		"react-hook-reference",
+		"---Development---",
+		"branding",
+		"contributing"
 	]
 }

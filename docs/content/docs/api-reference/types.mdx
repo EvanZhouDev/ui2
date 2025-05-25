@@ -1,0 +1,71 @@
+---
+title: Type Overview
+description: Learn the important UI2 API types
+---
+
+This type overview will only go through the important types that are not configurations (or in other words, any type that is used specifically for a method or function to configure it).
+
+## Core Types
+
+These types are core to UI2, and are the basic building blocks of all UI2 applications. Other types, including those for the Stateful/React implementation, extend these.
+
+### `Intent`
+
+```ts
+export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
+	parameters: T;
+	description: string;
+	onIntent: (intentCall: IntentCall<T>, input: string) => void;
+	onCleanup: (intentCall: IntentCall<T>, input: string) => void;
+};
+```
+
+The Intent is the central component of UI2. It takes a few critical components including:
+
+- `parameters`: A Zod `object` that creates the schema for the intent parameters
+- `description`: A string to describe what the intent does and when it should be triggered
+- `onIntent`: An event listener that is triggered when the intent is identified, returning a `IntentCall`
+- `onCleanup`: An event listener that is triggered when the intent is no longer identified, returning that same `IntentCall`
+
+### `IntentCall`
+
+```ts
+export type IntentCall<T extends z.ZodType = z.ZodObject<any>> = {
+	name: string;
+	id: string;
+	parameters: z.infer<T>;
+};
+```
+
+The `IntentCall` represents a single call when an Intent is identified.
+
+It contains three important attributes:
+
+- `name`: This name tells you which Intent was identified
+- `id`: This is an ID unique to that specific Intent identified. It will be used as well during cleanup and submit, so you can use it to track the intent throughout its lifecycle
+- `parameters`: This is an object structured exactly the same as the `parameters` passed in the `Intent`
+
+`IntentCalls` are used as the standard method of passing data back from any intent identified, even in extensions of UI2.
+
+## Stateful UI2 and React Hook
+
+If you are using UI2 with React, you are actually using the Stateful version of the UI2 API. Mostly, the type structure is the same, but the Stateful API does introduce some new features such as submission.
+
+### `StatefulIntent`
+
+```ts
+export type StatefulIntent<T extends z.ZodType = z.ZodObject<any>> =
+	Intent<T> & {
+		onSubmit: (intentCall: IntentCall<T>, input: string) => void;
+	};
+```
+
+`StatefulIntent` directly branches off of the existing `Intent`, and simply adds:
+
+- `onSubmit`: Identical in schema to `onIntent` and `onSubmit`, but is called when the user "confirms" their intent and submits.
+
+Submission is only possible with the stateful API, as it keeps tracks of which intents are "active" and currently identified.
+
+## Continuing
+
+The rest of the API documentation will help explain how to use various methods in UI2, and go more detail into configuration objects, which are not covered in this section.

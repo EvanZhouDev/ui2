@@ -1,0 +1,73 @@
+---
+title: Making a UI2 App
+description: Learn by doing in creating your first UI2 application.
+---
+
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Let's start by making our first UI2 application.
+As a reminder, we'll be making a **simple todo app** powered by UI2, with the following features integrated in the Intent Interface:
+
+- **Add todos**
+- **Mark todos as complete**
+
+Let's start by setting up our project. We'll be using Next.js as our template.
+
+<Steps>
+<Step>
+ 
+### Create a Next.js App
+
+```sh
+npx create-next-app@latest
+```
+
+Walk through the app creation steps.
+
+<Callout title="TypeScript Support">
+	UI2 is written in TypeScript and has many amazing features only available in
+	TypeScript.
+</Callout>
+
+We'll be using TypeScript and Tailwind CSS.
+
+</Step>
+ 
+<Step>
+ 
+### Install UI2
+
+Use `npm`, or your favorite package manager.
+
+```sh
+npm i ui2-sdk
+```
+
+</Step>
+
+<Step>
+ 
+### Prepare the Files
+
+Put the following code in your `page.tsx`:
+
+```jsx
+"use client";
+import { useUI2 } from "ui2-sdk/react";
+
+export default function Page() {
+	return (
+		<div>
+			<h1>Hello UI2!</h1>
+		</div>
+	);
+}
+```
+
+<Callout>
+	Note how we are importing the `useUI2` hook from `ui2-sdk/react` instead of
+	just `ui2-sdk`. This helps organize the features of UI2.
+</Callout>
+
+</Step>
+</Steps>

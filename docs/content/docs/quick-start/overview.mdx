@@ -1,0 +1,60 @@
+---
+title: Quick Start Overview
+description: What are we building?
+---
+
+In this Quick Start guide, we'll be creating our first UI2 instance.
+
+We will add multiple intents, explore UI2's powerful yet simple API, and also learn how to use UI2 to identify intents based on text.
+
+## The Result
+
+You'll create a simple intent identifier that's able to distinguish between two intents:
+
+- **Adding Two Numbers**: Takes two parameters, and logs their sum when identified
+- **Squaring a Number**: Takes one parameter, and logs their its square when identified
+
+This is the code we will be writing:
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+})
+	.addIntent("sum", {
+		parameters: z.object({
+			a: z.number(),
+			b: z.number(),
+		}),
+		description: "Add two numbers together",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+					intentCall.parameters.a + intentCall.parameters.b
+				}`
+			);
+		},
+	})
+	.addIntent("square", {
+		parameters: z.object({
+			a: z.number(),
+		}),
+		description: "Squares a number",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a}^2 = ${
+					intentCall.parameters.a * intentCall.parameters.a
+				}`
+			);
+		},
+	});
+
+identifyIntent("what is 2+2");
+```
+
+It might look complicated, but UI2 makes creating intents as easy as defining what each intent is.
+
+If you're ready to identify some intents, let's get right into it!

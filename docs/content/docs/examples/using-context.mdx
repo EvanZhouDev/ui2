@@ -1,0 +1,38 @@
+---
+title: Using Context
+description: Learn how to provide context to UI2
+---
+
+**Context** refers to the ability for UI2 to not only infer intents out of simple text, but also external, structured data that you pass in.
+
+This can include things like the todos that you have, the files on your system, and more.
+
+In order to pass in context, you simply use the `context` option in the configuration, like such:
+
+```ts
+let myTodos = ["eat lunch", "walk the dog"];
+let context = {
+	todos: myTodos,
+};
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+	context,
+});
+```
+
+## Context Structure
+
+`context` allows taking in _any_ data, in the form of a object that can have `JSON.stringify` ran on it.
+
+Note how we have to annotate explicitly that the list is our todos. This is because the AI doesn't have access to the variable name, so we have to give it explicitly.
+
+The other important thing is that context is pass-by-reference. If you pass in a normal object, and you try to update it by re-assigning, there is a chance UI2 may lose context.
+
+Instead, try putting context in a variable, and referencing that variable. Then, when needing to modify something, **mutate the variable** instead of re-assigning to it.
+
+## With the React Hook
+
+It is highly recommended that whatever context you are passing in is stored with State. That way, you do not have to worry about pass-by-reference and potentially losing data.
+
+The React Hook also uses `useEffect` to ensure the context is always up-to-date otherwise.

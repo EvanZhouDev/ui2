@@ -1,0 +1,125 @@
+---
+title: createUI2
+description: The wrapper function for the IntentCreator class
+---
+
+## Wrapper Function Explained
+
+As explained in the Overview, there is a functional wrapper for the `IntentCreator` class that improves the experience of building an Intent Interface, but also for various reasons such as potentially needing to bind state onto other extended UI2s (such as the Stateful React Hook).
+
+All functional builders simply return an instance of the `IntentCreator` class (or an extension of), so the actual methods are identical to the corresponding `IntentCreator`.
+
+Furthermore, most methods on the `IntentCreator` class also return a `this`, which means they can be easily chained.
+
+This page will explain the core `createUI2` function, and the following sections will explain its various other methods.
+
+## `createUI2` Parameters
+
+| Value Name        | Type                                               | Description                                                  |
+| :---------------- | :------------------------------------------------- | :----------------------------------------------------------- |
+| `model`           | `LanguageModel` or Model Configuration             | Configure the model to use with UI2.                         |
+| `systemPrompt`    | `string`                                           | Additional instructions for the AI.                          |
+| `context`         | `object`                                           | Context for intent identification                            |
+| `onLoadStart`     | `() => void`                                       | Called when AI loading startsonintent-and-onsubmit-options). |
+| `onLoadEnd`       | `() => void`                                       | Called when AI loading ends                                  |
+| `onPartialIntent` | `(partialIntents: IntentCall[]) => void;`          | Called on each stream part for the intent.                   |
+| `onIntent`        | `(intentCall: IntentCall, input?: string) => void` | Called when any full intent is detected                      |
+| `onCleanup`       | `(intentCall: IntentCall, input?: string) => void` | Called when any full Intent is cleaned up                    |
+
+### `model`
+
+You have two options to supply the model. First, you can use a Vercel AI SDK compatible `LanguageModel`, based off a [provider](https://ai-sdk.dev/providers/ai-sdk-providers).
+
+It is recommended to use [Cerebras](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras) for its speed.
+
+<Callout type="warn" title="Structured Output">
+	UI2 uses Structured Output to guarentee that your Intent parameter schemas are
+	satisfied. Your model has to support this feature. `llama-3.3-70b` from
+	Cerebras works great.
+</Callout>
+
+However, if you do not want to use Vercel AI SDK, you can also directly use a object of the following schema:
+
+```js
+{
+    baseURL: string,
+    apiKey: string,
+    modelId: string
+}
+```
+
+This helps specify any provider that is compliant with OpenAI schema.
+
+### `systemPrompt`
+
+These instructions are given to AI to guide its intent identification.
+
+You should tell it what app you are building, and generally when to identify each intent. Remember that you are able to specify instructions per intent as well, so don't get too specific.
+
+### `context`
+
+This is an object that supplies context to the AI. Remember that this object should have a stable reference, since whenever the reference is updated, the context will also be updated.
+
+This context can have any schema, and will be directly provided as-is to the AI.
+
+### `onLoadStart` and `onLoadEnd`
+
+These are called when the AI starts and stops loading respectively. Takes a callback with no arguments.
+
+### `onPartialIntent`
+
+This is a low-level callback that is called when the Intent object stream is coming in.
+
+This is a risky event listener to use, since the object may not be complete.
+
+However, if in theory you wished to make an integration to livetime stream incomplete toolcalls, this could be useful.
+
+<Callout type="warn">
+	Note that it returns what is seemingly a normal array of `IntentCall`s (based
+	off the type), but its properties may be incomplete.
+</Callout>
+
+### `onIntent`
+
+This onIntent returns any intent that is identified in the form of an `IntentCall`.
+
+It also provides the current input as its second parameter.
+
+This is a way to globally process intents, if you do not want to specify intent callbacks with `addIntent`, or want to do something on top of that.
+
+### `onCleanup`
+
+This onCleanup returns any intent that is cleaned up (in other words, no longer identified) in the form of an `IntentCall`.
+
+It also provides the current input as its second parameter.
+
+This is a way to globally process intents, if you do not want to specify intent callbacks with `addIntent`, or want to do something on top of that.
+
+## Return Value
+
+`createUI2` simply returns an instance of `IntentCreator`. Methods such as `identifyIntent` can be destructured off of the instance.
+
+## Example Usage
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+    systemPrompt: "You are identifying intents on a todo app."
+    onLoadStart: () => console.log("Loading started!"),
+    onLoadEnd: () => console.log("Loading finished"),
+});
+```
+
+## Methods
+
+`IntentCreator`, and thus `createUI2` returns various methods that are useful to manage your intent interface. All of these methods return a reference to the `IntentCreator` so you have two ways to call them.
+
+For one, you can destructure them from `createUI2`, and use them like `identifyIntent`.
+
+You can also choose to directly chain them under `createUI2`, such as for `.addIntent()`.
+
+There is a separate documentation page for [`addIntent`](/api-reference/addIntent), [`addOther`](/api-reference/addOther), and [`identifyIntent`](/api-reference/identifyIntent), and also another page for the rest of the miscellaneous methods.

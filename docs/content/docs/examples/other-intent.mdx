@@ -1,0 +1,74 @@
+---
+title: Catch-all/Other Intent
+description: Learn how to use the catch-all Other intent and its special features
+---
+
+The `other` intent is unique. It acts as a catch-all intent for cases where no other intent can be matched.
+
+<Callout type="warn">
+	You cannot name a normal intent `"other"`. If you wish to manipulate
+	properties on the `other` intent, you must use the `addOther` method.
+</Callout>
+
+Using the `other` intent could look something like this:
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+})
+	.addIntent("sum", {
+		parameters: z.object({
+			a: z.number(),
+			b: z.number(),
+		}),
+		description: "Add two numbers together",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+					intentCall.parameters.a + intentCall.parameters.b
+				}`
+			);
+		},
+	})
+	.addOther({
+		description: "Use this for any other mathematical operation",
+		onIntent: (intentCall) => console.log("That operation has no intent!"),
+	});
+
+identifyIntent("what is log base 2 of 4?");
+```
+
+This intent is rarely called, but you can instruct the AI to do so more commonly or less commonly in the description of this method.
+
+## The `other` Intent Lifecycle
+
+Furthermore, the `onIntent` and `onCleanup` cycle is slightly different for the `other` intent.
+
+Most importantly, know that `onCleanup` is only called when there is any `other` intent identified and later removed.
+
+This means that even if the content is different and there is an `other` intent in `currentIntents`, it is possible no cleanup and re-trigger is called.
+
+## Parameters
+
+Besides that, `addOther` functions very similarly to `addIntent` with a few "missing" parameters that you cannot customize on `other`.
+
+For one, you cannot pass in a name.
+
+Furthermore, in the configuration, you can only pass in:
+
+- `description`
+- `onIntent`
+- `onCleanup`
+- `onSubmit` (with React hook)
+
+The signature of these callbacks are identical.
+
+## Recommended Use Case
+
+It is highly recommended that for complicated applications, that you connect some form of a Chatbot/Agent onto UI2 when the `other` intent is submitted.
+
+This way, the user can express complicated workflows in the UI2 input and have them ran.

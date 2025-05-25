@@ -1,0 +1,39 @@
+---
+title: Extending UI2
+description: Learn how to extend the class-based UI2
+---
+
+The basic structure of UI2 takes the following form:
+
+- A "core" `IntentCreator` class that controls creating and identifying intents
+- A "builder function" `createUI2` that wraps that class
+
+However, as the existence of the `StatefulIntentCreator` shows, the basic "core" UI2 is very limited and also can be extended.
+
+In order to extend UI2, you need to do two things:
+
+## Extend `IntentCreator`
+
+Recall that the class interface is mostly "internal" and will not directly be used by the user. As such, it is better to make this class extremely general.
+
+Nonetheless, it should handle any state, any functions, and more that your intent identification needs.
+
+As an example, consult the `StatefulIntentCreator` Documentation
+
+## Build a Wrapper Function
+
+Now, you need to build a wrapper function to go around your class to make it easier to use. The most basic version of a wrapper function would be to literally return your new `IntentCreator` extension.
+
+However, there could be more to it than just that.
+
+For example, the React hook helps create and bind state, as well as use `useEffect` to bind context to make sure it's updated.
+
+## `IntentCreator` Extension vs Wrapper Function
+
+Remember that your `IntentCreator` may be used for more than just your specific Wrapper Function.
+
+Thus, make your `IntentCreator` more general and use your Wrapper Function to make it more specific.
+
+## Further Reading
+
+Check out both the [`StatefulIntentCreator` documentation](/statefulIntentCreator) and the [React Hook](/react-hook-reference) for inspiration on how to extend UI2 yourself.

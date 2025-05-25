@@ -3,33 +3,30 @@ title: Thinking in UI2
 description: Learn how the UI2 API is structured.
 ---
 
-UI2 is built around "intents," which can be thought of as **possible user actions**. As UI2 developers, you are responsible for defining these intents and their associated actions—as well as the UI on which these actions take place. The UI2 API will handle the rest, including prompting the AI, parsing output, and more.
+UI2 is built around "intents," which can be thought of as **possible user actions**. As UI2 developers, you are responsible for defining these intents and their associated actions. The UI2 API will handle the rest, including prompting the AI, parsing output, and more.
 
 ## The Structure of an Intent
 
 Each intent has a **name**, an optional **description**, as well as a list of **parameters**.
 
-Furthermore, each **intent** has 3 main "lifecycle" events:
+Furthermore, each **intent** has 2 main "lifecycle" events:
 
-- `onIntent`: A function that is called when the intent is identified
-- **Cleanup**: A cleanup function that is called when the intent is no longer relevant
-- `onSubmit`: A function that is called when the user submits the textbox with the intent
+- `onIntent` (Required): A function that is called when the intent is identified
+- `onCleanup` (Optional): A cleanup function that is called when the intent is no longer relevant
+
+For this demo, we don't have to worry about the cleanup. You can learn more about cleanup in the documentation, or in the React Quick Start. It's relevant when there is an actual frontend tethered to UI2.
 
 ## Choosing Our Intents
 
-For our app, we can identify the following intents and what should happen in their lifecycle.
+For our "Sum and Square" app, we'll make 2 key intents:
 
-- `addTodo`
-  - **Parameters**: Name of the todo
-  - `onIntent`: Show a preview of the new todo, to be added
-  - **Cleanup**: Remove the preview
-  - `onSubmit`: Actually add the new todo to the list
-- `completeTodo`
+- `sum`
+  - **Parameters**: 2 numbers to sum
+  - `onIntent`: Logs their sum
+- `square`
   - **Parameters**: Which todo to mark as complete
   - `onIntent`: Show a preview of the todo to be marked as complete
-  - **Cleanup**: Remove the preview
-  - `onSubmit`: Actually mark the todo as complete
 
 As you can see, all of these intents have a very similar lifecycle. As such, UI2 is designed to be compatible with a wide variety of different applications.
 
-Now, let's see how we can actually implement this in our app.
+Now, let's see how we can set this up in code.

@@ -1,0 +1,50 @@
+---
+title: Dynamic Intents
+description: Learn how to modify the intents on UI2 dynamically
+---
+
+While UI2 was originally designed to have a constant set of intents, you can also achieve dynamic intents through a few changes to the standard method of building the Intent Interface.
+
+## Example
+
+This approach likely makes the most sense with the React Hook, but here we show how you can theoretically do it with the Stateless API. It directly applies to the React `useUI2` hook as well.
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent, removeIntent, addIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+}).addIntent("sum", {
+	parameters: z.object({
+		a: z.number(),
+		b: z.number(),
+	}),
+	description: "Add two numbers together",
+	onIntent: (intentCall) => {
+		console.log(
+			`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+				intentCall.parameters.a + intentCall.parameters.b
+			}`
+		);
+	},
+});
+
+removeIntent("sum");
+addIntent("square", {
+	parameters: z.object({
+		a: z.number(),
+	}),
+	description: "Squares a number",
+	onIntent: (intentCall) => {
+		console.log(
+			`${intentCall.parameters.a}^2 = ${
+				intentCall.parameters.a * intentCall.parameters.a
+			}`
+		);
+	},
+});
+```
+
+Here, we remove the `sum` intent and then add the `square` intent. Note that `addIntent` can be destructured from `createUI2` or directly chained onto the end. This is due to the fact how `createUI2` returns an `IntentCreator` and all of its methods also return `IntentCreator`s.

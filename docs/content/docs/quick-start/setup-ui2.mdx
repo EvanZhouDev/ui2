@@ -3,144 +3,53 @@ title: Setting Up UI2
 description: Set up everything you need to use UI2
 ---
 
-Let's start by creating a state for all our todos, and a simple UI to render all our todos as well as the UI2 input box and submit button.
+Let's start by installing UI2, available on NPM or your favorite package manager.
 
-Update your `page.tsx` with a few changes:
-
-```jsx
-"use client";
-import { useUI2 } from "ui2.js";
-import { useState } from "react";
-
-export default function Page() {
-	const [todos, setTodos] = useState<
-		{
-			id: string;
-			name: string;
-			completed: boolean;
-            preview: string;
-		}[]
-	>([]);
-
-	return (
-		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
-			{todos.length
-				? todos.map((x) => (
-						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
-							{x.name} - {x.completed ? "Completed" : "Todo"}
-						</div>
-				  ))
-				: "No todos"}
-			<div className="flex flex-row gap-2">
-				<input className="p-1 outline" />
-				<button className="p-1 outline">Submit</button>
-			</div>
-		</div>
-	);
-}
+```bash tab="NPM"
+npm i ui2-sdk
 ```
 
-We're also including a `preview` field and UI state to each reminder. It'll make more sense when we start making intents.
+```bash tab="PNPM"
+pnpm add ui2-sdk
+```
 
-Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. The Here's what it should look like:
+```bash tab="Bun"
+bun add ui2-sdk
+```
 
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	// config here...
+```bash tab="Yarn"
+yarn add ui2-sdk
+```
+
+Now, simply import `createUI2`, and call it for now. This is how we'll be building our UI2 app today.
+
+```ts
+import { createUI2 } from "ui2-sdk";
+
+let { identifyIntent } = createUI2({});
+```
+
+We'll discuss the `identifyIntent` more later. However, for now, just know this is how you'll be actually identifying intent from text.
+
+Next, in the configuration object, we need to put a `model`. These are available through the Vercel AI SDK.
+
+It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/)
+models for their speed. Learn how to set it up on the [Vercel AI SDK
+Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
+
+<Callout type="warn" title="Structured Output">
+UI2 uses Structured Output to guarentee that your Intent parameter schemas are satisfied. Your model has to support this feature. `llama-3.3-70b` from Cerebras works great.
+</Callout>
+
+After you have your model set up, it should look something like this:
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
 });
 ```
 
-Let's update our input and submit button to use these returned variables:
-
-```jsx
-<div className="flex flex-row gap-2">
-	<input className="p-1 outline" value={inputValue} onChange={onInputChange} />
-	<button className="p-1 outline" onClick={onSubmit}>
-		Submit
-	</button>
-</div>
-```
-
-Next, before we configure our `useUI2`, we need to choose a model to run UI2 with. It is highly recommended to use the [Cerebras Instant Inference API](https://www.cerebras.ai/).
-
-UI2 supports usage with the [Vercel AI SDK](https://sdk.vercel.ai/providers/ai-sdk-providers), so we can simply set up a model as such:
-
-```jsx
-import { createCerebras } from "@ai-sdk/cerebras";
-
-const cerebras = createCerebras({
-	apiKey: "YOUR_API_KEY",
-});
-```
-
-Now, we can update our `useUI2` call to use the Cerebras model and also provide a System Prompt to tell the model what app we're making:
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a reminders app.",
-});
-```
-
-Finally, we have to give the model access to our reminders. We can use the `context` field to pass in any relevant state object.
-
-```jsx
-let { inputValue, onInputChange, onSubmit } = useUI2({
-	model: cerebras("llama-4-scout-17b-16e-instruct"),
-	systemPrompt: "This is a todo app.",
-	context: todos,
-});
-```
-
-Altogether, your file should look like this:
-
-```jsx
-"use client";
-import { useUI2 } from "ui2.js";
-import { createCerebras } from "@ai-sdk/cerebras";
-import { useState } from "react";
-
-export default function Page() {
-	const cerebras = createCerebras({
-		apiKey: "YOUR_API_KEY",
-	});
-
-	const [todos, setTodos] = useState<
-		{
-			id: string;
-			name: string;
-			completed: boolean;
-            status: boolean;
-		}[]
-	>([]);
-
-	let { inputValue, onInputChange, onSubmit } = useUI2({
-		model: cerebras("llama-4-scout-17b-16e-instruct"),
-		systemPrompt: "This is a todo app.",
-		debounceDelay: 300,
-		context: todos,
-	});
-
-	return (
-		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
-			{todos.length
-				? todos.map((x) => (
-						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
-							{x.name} - {x.completed ? "Completed" : "Todo"}
-						</div>
-				  ))
-				: "No todos"}
-			<div className="flex flex-row gap-2">
-				<input
-					className="p-1 outline"
-					value={inputValue}
-					onChange={onInputChange}
-				/>
-				<button className="p-1 outline" onClick={onSubmit}>
-					Submit
-				</button>
-			</div>
-		</div>
-	);
-}
-```
+Now, let's move on to creating some intents!

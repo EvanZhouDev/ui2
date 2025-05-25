@@ -1,0 +1,28 @@
+---
+title: Other createUI2 Methods
+description: Documentation for the rest of the createUI2 methods
+---
+
+Besides the main methods like [`addIntent`](/api-reference/addIntent), [`addOther`](/api-reference/addOther), and [`identifyIntent`](/api-reference/identifyIntent), documented before, there are also other methods available on `IntentCreator` (returned by `createUI2`). They are documentd here.
+
+## `setContext`
+
+```ts
+public setContext(context: object): this
+```
+
+This method takes one argument, and helps to "rebind" the context to any new object.
+
+This is because if you originally pass in an object to the configuration, it will only update if you update the reference to that object.
+
+If you wish to change the object reference or put a new object altogether, this will help.
+
+## `removeIntent`
+
+```ts
+public removeIntent(intentName: string): this
+```
+
+This method removes an intent from the UI2 Interface. It takes the `intentName`, and will throw an error if the Intent is not defined.
+
+This can be helpful to modify the UI2 intent interface dynamically.

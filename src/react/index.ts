@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
-import { UI2Config, UI2CreatorConfig } from "./types";
-import IntentCreator from "./src/intentCreator";
-
-export let useUI2 = (config: UI2Config) => {
-	// Default configuration values
-	const defaultConfig: Omit<UI2CreatorConfig, "model"> = {
+import { UI2ReactConfig } from "./types";
+import { StatefulIntentCreator } from "../statefulIntentCreator";
+import { StatefulIntentCreatorConfig } from "../types";
+import { useState, useEffect, useRef } from "react";
+export let useUI2 = (config: UI2ReactConfig) => {
+	const [inputVal, setInputVal] = useState<string>("");
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const defaultConfig: Omit<StatefulIntentCreatorConfig, "model"> = {
 		systemPrompt: "",
 		context: {},
 		debounceDelay: 300,
@@ -12,17 +13,15 @@ export let useUI2 = (config: UI2Config) => {
 		onSubmitStart: () => {
 			setInputVal("");
 		},
-		onSubmitComplete: () => {},
+		onSubmitEnd: () => {},
+		onPartialIntent: () => {},
+		onLoadStart: () => {},
+		onLoadEnd: () => {},
+		onCleanup: () => {},
 	};
-
-	const [inputVal, setInputVal] = useState<string>("");
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-
-	// Use useRef to maintain a stable reference to the instance
-	const instanceRef = useRef<IntentCreator | null>(null);
-
+	const instanceRef = useRef<StatefulIntentCreator | null>(null);
 	if (!instanceRef.current) {
-		instanceRef.current = new IntentCreator(
+		instanceRef.current = new StatefulIntentCreator(
 			{
 				...defaultConfig,
 				...config,
@@ -40,14 +39,12 @@ export let useUI2 = (config: UI2Config) => {
 		instanceRef.current.setIsLoading = setIsLoading;
 	}
 
-	// Update context when it changes
 	useEffect(() => {
 		if (instanceRef.current) {
 			instanceRef.current.config.context = config.context;
 		}
 	}, [config.context]);
 
-	// Clean up the debounce on unmount
 	useEffect(() => {
 		return () => {
 			if (instanceRef.current?.inputDebounceHandler.clear) {

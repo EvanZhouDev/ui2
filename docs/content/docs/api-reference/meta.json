@@ -1,0 +1,15 @@
+{
+	"title": "UI2 API Reference",
+	"icon": "MyIcon",
+	"pages": [
+		"types",
+		"intentCreator",
+		"createUI2",
+		"addIntent",
+		"addOther",
+		"identifyIntent",
+		"statefulIntentCreator",
+		"other-createui2-methods"
+	],
+	"defaultOpen": true
+}

@@ -1,0 +1,67 @@
+---
+title: Identifying Intents
+description: Identifying your first intent
+---
+
+Now that you've defined the intents, it's time to actually try to identify intents from text.
+
+In order to do this, we'll be using that `identifyIntent` function that we destructured from `createUI2`.
+
+Here's the code:
+
+```ts
+identifyIntent("what is 2+2");
+```
+
+## It's as Simple as That
+
+That's it. You don't need to assign it to a variable, write any if statements to process, or anything.
+
+Seems too good to be true?
+
+Well, sort of. In fact, in your `createUI2` above, you already defined all the behavior. Thus, `identifyIntent` directly draws from that. No additional setup needed.
+
+## The Complete Code
+
+To conclude, here's the final code all over again:
+
+```ts
+import { createUI2 } from "ui2-sdk";
+import { cerebras } from "@ai-sdk/cerebras";
+import { z } from "zod";
+
+let { identifyIntent } = createUI2({
+	model: cerebras("llama-3.3-70b"),
+})
+	.addIntent("sum", {
+		parameters: z.object({
+			a: z.number(),
+			b: z.number(),
+		}),
+		description: "Add two numbers together",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a} + ${intentCall.parameters.b} = ${
+					intentCall.parameters.a + intentCall.parameters.b
+				}`
+			);
+		},
+	})
+	.addIntent("square", {
+		parameters: z.object({
+			a: z.number(),
+		}),
+		description: "Squares a number",
+		onIntent: (intentCall) => {
+			console.log(
+				`${intentCall.parameters.a}^2 = ${
+					intentCall.parameters.a * intentCall.parameters.a
+				}`
+			);
+		},
+	});
+
+identifyIntent("what is 2+2");
+```
+
+Read the next section to see what's next for your UI2 journey.

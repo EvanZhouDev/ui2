@@ -1,0 +1,35 @@
+---
+title: addOther
+description: Using the catch-all Other intent
+---
+
+The `other` intent is unique. It acts as a catch-all intent for cases where no other intent can be matched.
+
+<Callout type="warn">
+	You cannot name a normal intent `"other"`. If you wish to manipulate
+	properties on the `other` intent, you must use the `addOther` method.
+</Callout>
+
+This intent is rarely called, but you can instruct the AI to do so more commonly or less commonly in the description of this method.
+
+## The `other` Intent Lifecycle
+
+Furthermore, the `onIntent` and `onCleanup` cycle is slightly different for the `other` intent.
+
+Most importantly, know that `onCleanup` is only called when there is any `other` intent identified and later removed.
+
+This means that even if the content is different and there is an `other` intent in `currentIntents`, it is possible no cleanup and re-trigger is called.
+
+## `addOther` Parameters
+
+When dealing with the call signature, `addOther` functions very similarly to `addIntent` with a few "missing" parameters that you cannot customize on `other`.
+
+Of course, you cannot customize the name. The configuration is also missing a few properties.
+
+| Value Name    | Type                                                  | Description                                      |
+| :------------ | :---------------------------------------------------- | :----------------------------------------------- |
+| `description` | `string`                                              | Customize when the `other` intent can be called. |
+| `onIntent`    | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is identified.           |
+| `onCleanup`   | `(intentCall: IntentCall<T>, input?: string) => void` | Called when this intent is no longer detected.   |
+
+Consult the `addIntent` documentation to learn more about what these do.

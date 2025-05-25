@@ -1,53 +1,25 @@
-import type {
-	UI2CreatorConfig,
+import { LanguageModel, streamObject } from "ai";
+import { z } from "zod";
+import { createOpenAI } from "@ai-sdk/openai";
+import zodToJsonSchema from "zod-to-json-schema";
+import {
+	IntentCreatorConfig,
+	Intent,
+	IntentPartialOptional,
 	Intents,
 	IntentCall,
-	Intent,
-	ParsedIntentCall,
-	CleanupFunction,
-} from "../types";
-import debounce, { DebouncedFunction } from "debounce";
-import { z } from "zod";
-import { flushSync } from "react-dom";
-import zodToJsonSchema from "zod-to-json-schema";
-import { LanguageModel, streamText } from "ai";
-import parseIntentCalls from "./parseIntentCall";
-import { nanoid } from "nanoid";
-import { createOpenAI } from "@ai-sdk/openai";
+	IdentifyIntentConfig,
+	OtherIntent,
+} from "./types";
+export class IntentCreator {
+	public intents: Intents = {};
 
-export default class IntentCreator {
-	private cleanup = new Map<string, () => void>();
-	private intents: Intents = {};
-
-	// Any processed intent calls
-	private activeIntentCalls: IntentCall<any>[] = [];
-
-	// Ongoing promise for identifying intents
-	private intentIdentificationPromise: Promise<void> | null = null;
-	private resolveIntentIdentification: (() => void) | null = null;
-
-	// Debounced handler for input
-	inputDebounceHandler: DebouncedFunction<(text: string) => void>;
-
-	constructor(
-		public config: UI2CreatorConfig,
-		public inputValue: string,
-		public setInputValue: (val: string) => void,
-		public isLoading: boolean,
-		public setIsLoading: (val: boolean) => void
-	) {
-		// Initialize loading state binding
-		this.isLoading = isLoading;
-		this.setIsLoading = setIsLoading;
-		this.inputDebounceHandler = debounce(
-			(text: string) => this.identifyIntent(text),
-			this.config.debounceDelay
-		);
+	constructor(public config: IntentCreatorConfig) {
+		this.identifyIntent = this.identifyIntent.bind(this);
 	}
 
 	private createPrompt = (text: string) => {
-		// Generate intents section dynamically
-		let intentsSection = "# Possible Intents\n";
+		let intentsSection = "# Intent Descriptions\n";
 
 		Object.entries(this.intents).forEach(([intentName, intent]) => {
 			// Add intent name and description
@@ -55,7 +27,7 @@ export default class IntentCreator {
 
 			// Check if it has parameters (it's a ParameterIntent)
 			if ("parameters" in intent) {
-				intentsSection += "Parameter Dictionary Format:\n";
+				intentsSection += "Parameter Schema and Description:\n";
 
 				// Convert Zod schema to a string representation
 				const paramSchema = intent.parameters;
@@ -67,211 +39,262 @@ export default class IntentCreator {
 			intentsSection += "\n";
 		});
 
-		return `You are helping a user identify the intent of their text.
+		return `
+Your goal is to translate the user text into as many **Intents** as possible.
 
-The user gives you the following instructions:
+* The user may not be obvious with their **Intents**
+	* Thus, you must imply the user's intent from their input
+* The user may give multiple commands in one input, and you should try to identify all of them
+* It is given that the user is expressing one of the following intents
+* It is always better to identify an intent than to not identify one
+* It may be helpful not to take the user's input literally, but rather to interpret it in the context of the intents
+
+${
+	this.config.systemPrompt &&
+	`The user gives you the following additional instructions and information about their situation:
 \`\`\`
 ${this.config.systemPrompt}
-\`\`\`
+\`\`\``
+}
 
-The user gives you the following context:
+${
+	this.config.context &&
+	`The user gives you the following context and data about their situation:
 \`\`\`
 ${JSON.stringify(this.config.context, null, 2)}
-\`\`\`
+\`\`\``
+}
+
+# Intent Descriptions
+
+Here is the schema for the parameters, as well as descriptions for some parameters that you should use to guide your decisions.
 
 ${intentsSection}
+
 # Output Format
-* Return identified intents in the form of JavaScript function calls with the EXACT intent names provided
-* Assume all of these functions are already defined
-* All functions only take up to one parameter.
-* This parameter should only be a JSON object.
-* There should never be more than one parameter, or positional parameters.
-* You may **only** write JavaScript function calls. You may write no other code.
-* You may call multiple intents unless otherwise specified by the user
-* If you are unsure, you should only return the single intent \`other()\`
+
+* You will return an array of objects with two properties:
+		* \`name\` of the intent
+		* \`parameters\` of the intent
+* Follow the given schema when returning the intents
+* You may and should return multiple intents when the user's command includes multiple actions
+* You should always return an intent, if not more
+* Only if you are completely unsure, you should return a length-1 array with one intent with name \`other\` and blank parameters, but use this sparingly.
+* NEVER return \`other\` with other intents
 
 # User Input
-${text}`;
+
+Translate the following user input into intents:
+\`\`\`
+${text}
+\`\`\`
+`;
 	};
 
-	// Flattens intent call without ID
-	private flattenIntentCall = (intentCall: ParsedIntentCall | IntentCall) => {
+	// Allows IntentCalls to be compared
+	private flattenIntentCall = (intentCall: IntentCall) => {
 		return JSON.stringify({
 			name: intentCall.name,
 			parameters: intentCall.parameters,
 		});
 	};
 
-	private identifyIntent = async (text: string) => {
-		if (text == "") {
-			for (const [intentId, cleanupFn] of this.cleanup) {
-				flushSync(cleanupFn);
-				this.cleanup.delete(intentId);
-			}
-			this.activeIntentCalls = [];
-			return;
+	public setContext(context: object) {
+		this.config.context = context;
+		return this;
+	}
+
+	public removeIntent(intentName: string) {
+		if (this.intents[intentName]) {
+			delete this.intents[intentName];
+		} else {
+			throw new Error(`Intent with name "${intentName}" does not exist.`);
+		}
+		return this;
+	}
+
+	async identifyIntent(text: string, config?: IdentifyIntentConfig) {
+		let model: LanguageModel;
+		if ("specificationVersion" in this.config.model) {
+			model = this.config.model as LanguageModel;
+		} else {
+			model = createOpenAI({
+				// custom settings, e.g.
+				apiKey: this.config.model.apiKey,
+				baseURL: this.config.model.baseURL,
+			})(this.config.model.modelId);
 		}
 
-		// Indicate loading start
-		this.setIsLoading(true);
-
-		try {
-			let model: LanguageModel;
-			if ("specificationVersion" in this.config.model) {
-				model = this.config.model as LanguageModel;
-			} else {
-				model = createOpenAI({
-					// custom settings, e.g.
-					apiKey: this.config.model.apiKey,
-					baseURL: this.config.model.baseURL,
-				})(this.config.model.modelId);
-			}
-
-			const { textStream } = streamText({
-				model,
-				prompt: this.createPrompt(text),
-				temperature: 0,
-			});
-
-			let partialOutput = "";
-			let processed = 0;
-
-			// Track which intent IDs will remain active
-			const intentIDsToKeep = new Set<string>();
-
-			// Queue of new intents to process AFTER cleanup
-			const newIntentsQueue: IntentCall[] = [];
-
-			// Current intent calls to use after processing
-			const updatedIntentCalls: IntentCall[] = [];
-			for await (const textPart of textStream) {
-				partialOutput += textPart;
-
-				const partialIntentCalls = parseIntentCalls(
-					partialOutput,
-					this.intents
-				);
-
-				// Process newly detected intent calls
-				if (partialIntentCalls.length > processed) {
-					for (let i = processed; i < partialIntentCalls.length; i++) {
-						const parsedIntent = partialIntentCalls[i];
-
-						// Check if we already have this intent (by exact parameter match)
-						const existingIntentIdx = this.activeIntentCalls.findIndex(
-							(intent) =>
-								this.flattenIntentCall(intent) ===
-								this.flattenIntentCall(parsedIntent)
-						);
-
-						if (existingIntentIdx >= 0) {
-							// Reuse existing intent
-							const existingId = this.activeIntentCalls[existingIntentIdx].id;
-							intentIDsToKeep.add(existingId);
-							updatedIntentCalls.push({
-								...parsedIntent,
-								id: existingId,
-							});
-						} else {
-							// This is a new intent - generate ID and queue for later processing
-							const newId = nanoid();
-							newIntentsQueue.push({
-								...parsedIntent,
-								id: newId,
-							});
-							updatedIntentCalls.push({
-								...parsedIntent,
-								id: newId,
-							});
-						}
-					}
-					processed = partialIntentCalls.length;
-				}
-			}
-
-			// Perform all cleanups for intents no longer present
-			for (const [intentId, cleanupFn] of this.cleanup) {
-				if (!intentIDsToKeep.has(intentId)) {
-					flushSync(cleanupFn);
-					this.cleanup.delete(intentId);
-				}
-			}
-
-			// Process new intents
-			for (const intentCall of newIntentsQueue) {
-				const cleanup = this.onIntentCall(intentCall);
-				const globalCleanup = this.config.onIntent(text);
-				if (typeof cleanup === "function") {
-					this.cleanup.set(intentCall.id, () => {
-						cleanup?.();
-						if (typeof globalCleanup === "function") {
-							globalCleanup?.();
-						}
-					});
-				}
-			}
-
-			this.activeIntentCalls = updatedIntentCalls;
-		} finally {
-			// Finish loading
-			this.setIsLoading(false);
-			this.resolveIntentIdentification?.();
-			this.resolveIntentIdentification = null;
-			this.intentIdentificationPromise = null;
-		}
-	};
-
-	private onIntentCall = (
-		intentCall: IntentCall<any>
-	): CleanupFunction | void => {
-		return (this.intents[intentCall.name] as Intent).onIntent(
-			intentCall,
-			this.inputValue
+		// Create a discriminated union schema with each intent having its literal name
+		const intentSchemas = Object.entries(this.intents).map(([name, intent]) =>
+			z.object({
+				name: z.literal(name),
+				parameters: intent.parameters,
+			})
 		);
-	};
 
-	onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const newValue = e.target.value;
-		this.setInputValue(newValue);
-
-		// Cancel any pending debounced calls
-		if (this.inputDebounceHandler.clear) {
-			this.inputDebounceHandler.clear();
-		}
-
-		let resolveIdentification: () => void;
-		this.intentIdentificationPromise = new Promise<void>((resolve) => {
-			resolveIdentification = resolve;
+		// Add the "other" intent schema
+		const otherSchema = z.object({
+			name: z.literal("other"),
+			parameters: z.object({}),
 		});
-		this.resolveIntentIdentification = resolveIdentification!;
 
-		this.inputDebounceHandler(newValue);
-	};
+		// Create a union of all intent schemas
+		const intentSchema =
+			intentSchemas.length > 0
+				? z.union([...intentSchemas, otherSchema] as unknown as [
+						z.ZodTypeAny,
+						z.ZodTypeAny,
+						...z.ZodTypeAny[]
+				  ])
+				: otherSchema;
 
-	onSubmit = async () => {
-		// Store it locally in case user resets it outside
-		const inputValue = this.inputValue;
-		this.config.onSubmitStart();
+		this.config.onLoadStart();
+		const { partialObjectStream, object } = streamObject({
+			model,
+			schema: z.array(intentSchema),
+			output: "object",
+			mode: "json",
+			prompt: this.createPrompt(text),
+			onError: (error) => {
+				console.warn("Error:", error);
+			},
+		});
 
-		if (this.intentIdentificationPromise) {
-			try {
-				await this.intentIdentificationPromise;
-			} catch (error) {
-				console.error("Error waiting for intent identification:", error);
+		const calledIntentIds = new Set<string>();
+		const remainingCurrentIntents = structuredClone(config.currentIntents);
+		const callIntents = [];
+		// Whether or not the "other" intent was already identified
+		const hasExistingOther =
+			remainingCurrentIntents.findIndex(
+				(existingIntentCall) => existingIntentCall.name === "other"
+			) != -1;
+		// Whether or not the "other" intent was identified in this call (to be decided)
+		let hasCurrentOther = false;
+
+		const processIntentCall = (intentCall: IntentCall<any>) => {
+			if (intentCall.name !== "other") {
+				const existingIntentCallIdx = remainingCurrentIntents.findIndex(
+					(existingIntentCall) =>
+						this.flattenIntentCall(existingIntentCall) ===
+						this.flattenIntentCall(intentCall)
+				);
+				if (existingIntentCallIdx != -1) {
+					const existingIntentCall =
+						remainingCurrentIntents[existingIntentCallIdx];
+					calledIntentIds.add(existingIntentCall.id);
+					// Remove the intent call, so that it can't be matched again
+					remainingCurrentIntents.splice(existingIntentCallIdx, 1);
+					return existingIntentCall;
+				} else {
+					// Add new intent call
+					intentCall.id = crypto.randomUUID();
+					callIntents.push(() => {
+						this.intents[intentCall.name].onIntent(intentCall, text);
+						this.config.onIntent(intentCall, text);
+					});
+					return intentCall;
+				}
+			} else {
+				// Mark already has other as true
+				hasCurrentOther = true;
+				return intentCall;
+			}
+		};
+
+		let activeIntentCalls: IntentCall[] = [];
+		let processedIdx = 0;
+		for await (const partialObject of partialObjectStream) {
+			this.config.onPartialIntent(partialObject);
+			if (partialObject.length > processedIdx + 1) {
+				// Never process the latest element, since you don't know if it is complete
+				for (; processedIdx < partialObject.length - 1; processedIdx++) {
+					const call = processIntentCall(partialObject[processedIdx]);
+					activeIntentCalls.push(call);
+				}
 			}
 		}
-		this.cleanup.clear();
-
-		for (const intentCall of this.activeIntentCalls) {
-			this.intents[intentCall.name].onSubmit(intentCall, inputValue);
+		const finalToolCalls = await object;
+		for (; processedIdx < finalToolCalls.length; processedIdx++) {
+			const call = processIntentCall(finalToolCalls[processedIdx]);
+			activeIntentCalls.push(call);
 		}
-		this.config.onSubmitComplete();
 
-		this.activeIntentCalls = [];
-	};
+		const otherCall = {
+			name: "other",
+			parameters: {},
+			id: "",
+		};
+		// In the case there was an existing other, but now the input is blank
+		if (hasExistingOther && text.trim() == "") {
+			if (this.intents["other"]) {
+				this.intents["other"].onCleanup?.(otherCall, text);
+			}
+		}
+		// The textbox is not blank, but no intents were called. Implied "other" added
+		else if (finalToolCalls.length === 0 && text.trim() != "") {
+			// Potential call onIntent
+			if (!hasExistingOther) {
+				if (this.intents["other"]) {
+					this.intents["other"].onIntent?.(otherCall, text);
+				}
+			}
+			activeIntentCalls.push(otherCall);
+		} else {
+			// If there was an "other" before, but there isn't now, call the cleanup
+			if (hasExistingOther) {
+				if (!hasCurrentOther) {
+					if (this.intents["other"]) {
+						this.intents["other"].onCleanup?.(otherCall, text);
+					}
+				}
+			} else {
+				for (const curIntents of config.currentIntents) {
+					if (!calledIntentIds.has(curIntents.id)) {
+						// Clean up the unused intents
+						this.intents[curIntents.name].onCleanup(curIntents, text);
+						this.config.onCleanup(curIntents, text);
+					}
+				}
+			}
+		}
+		this.config.onLoadEnd();
 
-	addIntent<T extends z.ZodType>(intentName: string, intent: Intent<T>): this {
-		this.intents[intentName] = intent;
+		// If text is simply blank, still run cleanups, but don't call intents
+		if (text.trim() != "") {
+			// Cache all intent calls to occur after cleanup
+			for (const callIntent of callIntents) {
+				callIntent();
+			}
+		}
+		return activeIntentCalls;
+	}
+
+	addIntent<T extends z.ZodType>(
+		intentName: string,
+		intent: IntentPartialOptional<T>
+	): this {
+		if (intentName === "other")
+			throw new Error(
+				"Intent name cannot be `other`. If you wish to add an `other` intent, use the `addOther` method."
+			);
+		let completeIntent: Intent<T> = {
+			onCleanup: () => {},
+			description: "",
+			...intent,
+		};
+		this.intents[intentName] = completeIntent;
+		return this;
+	}
+
+	addOther(intent: OtherIntent): this {
+		this.intents["other"] = {
+			parameters: z.object({}),
+			onCleanup: () => {},
+			onIntent: () => {},
+			description: "",
+			...intent,
+		};
 		return this;
 	}
 }

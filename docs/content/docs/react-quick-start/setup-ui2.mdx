@@ -1,0 +1,176 @@
+---
+title: Setting Up UI2
+description: Set up everything you need to use UI2
+---
+
+Let's start by creating a state for all our todos, and a simple UI to render all our todos as well as the UI2 input box and submit button.
+
+Update your `page.tsx` with a few changes:
+
+```jsx
+"use client";
+import { useUI2 } from "ui2-sdk/react";
+import { useState } from "react";
+
+export default function Page() {
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+            preview: string;
+		}[]
+	>([]);
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input className="p-1 outline" />
+				<button className="p-1 outline">Submit</button>
+			</div>
+		</div>
+	);
+}
+```
+
+We're also including a `preview` field and UI state to each reminder. It's a flag that tells us when we're Previewing a new reminder. It'll make more sense when we start making intents and previewing intent actions.
+
+Now, we'll set up UI2. We will use the `useUI2` hook, which returns state variables and functions to manage the UI2 state. Here's what it should look like:
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	// config here...
+});
+```
+
+Let's update our input and submit button to use these returned variables:
+
+```jsx
+<div className="flex flex-row gap-2">
+	<input
+		className="p-1 outline"
+		value={inputValue}
+		onChange={(e) => handleInputChange(e.target.value)}
+	/>
+	<button className="p-1 outline" onClick={handleSubmit}>
+		Submit
+	</button>
+</div>
+```
+
+<Callout>
+	`handleInputChange` takes a string. Ensure you are passing in `e.target.value`
+	instead of directly passing in an event listener.
+</Callout>
+
+Next, in the configuration object for `useUI2`, we need to put a `model`. These are available through the Vercel AI SDK.
+
+It is highly recommended that you use the [Cerebras](https://www.cerebras.ai/)
+models for their speed. Learn how to set it up on the [Vercel AI SDK
+Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
+
+<Callout type="warn" title="Structured Output">
+	UI2 uses Structured Output to guarentee that your Intent parameter schemas are
+	satisfied. Your model has to support this feature. `llama-3.3-70b` from
+	Cerebras works great.
+</Callout>
+
+After you have your model set up, it should look something like this:
+
+```jsx
+import { createCerebras } from "@ai-sdk/cerebras";
+
+let cerebras = createCerebras({
+	apiKey: "API_KEY",
+});
+
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+});
+```
+
+Let's also provide a **System Prompt** to tell the model what app we're making:
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+});
+```
+
+Finally, we have to give the model access to our reminders. We can use the `context` field to pass in any relevant state object.
+
+Context is one of the special features of UI2. Not only is intent identification based on your input, it's also based off of data from your app.
+
+```jsx
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	context: todos.filter((x) => !x.preview),
+});
+```
+
+<Callout title="Being Careful About Context">
+	Note how we are filtering out the reminders marked as preview. This is so that
+	the LLM doesn't get confused and try to modify reminders in preview, which
+	aren't confirmed. This is a standard pattern in UI2.
+</Callout>
+
+Altogether, your file should look like this now:
+
+```jsx
+"use client";
+import { useUI2 } from "ui2-sdk/react";
+import { createCerebras } from "@ai-sdk/cerebras";
+import { useState } from "react";
+
+export default function Page() {
+	const [todos, setTodos] = useState<
+		{
+			id: string;
+			name: string;
+			completed: boolean;
+            status: boolean;
+		}[]
+	>([]);
+
+	let cerebras = createCerebras({
+		apiKey: "API_KEY",
+	});
+
+	let { inputValue, handleInputChange, handleSubmit } = useUI2({
+		model: cerebras("llama-3.3-70b"),
+		systemPrompt: "This is a todo app.",
+		context: todos.filter((x) => !x.preview),
+	});
+
+	return (
+		<div className="w-screen h-screen flex flex-col items-center justify-between p-4">
+			{todos.length
+				? todos.map((x) => (
+						<div key={x.id} className={x.preview ? "opacity-50" : ""}>
+							{x.name} - {x.completed ? "Completed" : "Todo"}
+						</div>
+				  ))
+				: "No todos"}
+			<div className="flex flex-row gap-2">
+				<input
+					className="p-1 outline"
+					value={inputValue}
+					onChange={handleInputChange}
+				/>
+				<button className="p-1 outline" onClick={onSubmit}>
+					Submit
+				</button>
+			</div>
+		</div>
+	);
+}
+```

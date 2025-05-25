@@ -1,0 +1,60 @@
+---
+title: Using Your UI2 App
+description: The features to try
+---
+
+Now that you've finished your app, you can actually try using it.
+
+The great part about UI2 is that due to the powerful LLM powered intent framework, there is much more to UI2 than what you seemingly only implemented.
+
+Here are some basic things to try out:
+
+- **Create a todo with a natural language statement**
+  - _"Make a todo to walk the dog"_
+- **Complete todos with natural language statements**
+  - _"Mark that todo to walk the dog as done"_
+
+And some more complicated things that you can do:
+
+- **Create multiple todos with natural language statements**
+  - _"Make a todo to walk the dog and to get groceries"_
+- **Complete all your todos**
+  - _"Complete all my todos"_
+- **Combination of creating and completing todos**
+  - _"Mark walking the dog as complete and add reminder to get groceries"_
+
+Now, while this may seem slightly inefficient, you can easily modify the system prompt to guide the LLM to interpret any statement that isn't a command to be a new reminder, so you can simply say _"Walk the dog"_ and have it create a todo.
+
+Have fun with experimenting with UI2!
+
+## Notes on AI Usage
+
+There are a few things that you have to be aware of while using UI2. While UI2 does not use that many tokens per request, it does tend to use many requests.
+
+<Callout type="warn">
+	While typically its hard to hit rate limits when you are the one using UI2,
+	you may hit rate limits during development.
+</Callout>
+
+Something that you can change is the `debounceDelay` which increases the cooldown between consecutive AI calls. Similarly, if you ahve the budget, you can also decrease this delay to make UI2 feel more snappy.
+
+It's best to adapt this delay to your audience. For example:
+
+- **Shorter Delay**: If your app requires very fast feedback or typically consists of fast typers
+- **Longer Delay**: If immediate preview isn't as important or your app typically has slower typers
+
+The default delay is 300ms (`debounceDelay: 300`) but you can change this property by passing it into the `useUI2` config, as such:
+
+```ts
+let { inputValue, handleInputChange, handleSubmit } = useUI2({
+	model: cerebras("llama-3.3-70b"),
+	systemPrompt: "This is a todo app.",
+	debounceDelay: 500, // In ms
+	context: todos.filter(x => !x.preview),
+});
+```
+
+<Callout>
+	Note that this delay has to be combined with AI latency, so the real debounce
+	will _feel_ like more than 300ms.
+</Callout>
