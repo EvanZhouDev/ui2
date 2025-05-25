@@ -9,8 +9,12 @@ The next step is to actually define our intents. First, here's the code for one 
 
 ```ts
 import { createUI2 } from "ui2-sdk";
-import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
+import { createCerebras } from "@ai-sdk/cerebras";
+
+const cerebras = createCerebras({
+	apiKey: "API_KEY",
+});
 
 let { identifyIntent } = createUI2({
 	model: cerebras("llama-3.3-70b"),
@@ -94,8 +98,12 @@ Here's the final code with both intents:
 
 ```ts
 import { createUI2 } from "ui2-sdk";
-import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
+import { createCerebras } from "@ai-sdk/cerebras";
+
+const cerebras = createCerebras({
+	apiKey: "API_KEY",
+});
 
 let { identifyIntent } = createUI2({
 	model: cerebras("llama-3.3-70b"),

@@ -1,0 +1,7 @@
+{
+	"type": "module",
+	"name": "ui2-quick-start",
+	"dependencies": {
+		"ui2-sdk": "^1.0.0"
+	}
+}

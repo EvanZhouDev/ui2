@@ -21,6 +21,8 @@ bun add ui2-sdk
 yarn add ui2-sdk
 ```
 
+For this guide, we can use either TypeScript or JavaScript. Howevever, UI2 is built from the ground up for TS, so feel free to try it out!
+
 Now, simply import `createUI2`, and call it for now. This is how we'll be building our UI2 app today.
 
 ```ts
@@ -38,14 +40,20 @@ models for their speed. Learn how to set it up on the [Vercel AI SDK
 Website](https://ai-sdk.dev/providers/ai-sdk-providers/cerebras).
 
 <Callout type="warn" title="Structured Output">
-UI2 uses Structured Output to guarentee that your Intent parameter schemas are satisfied. Your model has to support this feature. `llama-3.3-70b` from Cerebras works great.
+	UI2 uses Structured Output to guarentee that your Intent parameter schemas are
+	satisfied. Your model has to support this feature. `llama-3.3-70b` from
+	Cerebras works great.
 </Callout>
 
 After you have your model set up, it should look something like this:
 
 ```ts
 import { createUI2 } from "ui2-sdk";
-import { cerebras } from "@ai-sdk/cerebras";
+import { createCerebras } from "@ai-sdk/cerebras";
+
+const cerebras = createCerebras({
+	apiKey: "API_KEY",
+});
 
 let { identifyIntent } = createUI2({
 	model: cerebras("llama-3.3-70b"),

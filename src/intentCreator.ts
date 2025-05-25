@@ -162,7 +162,9 @@ ${text}
 		});
 
 		const calledIntentIds = new Set<string>();
-		const remainingCurrentIntents = structuredClone(config.currentIntents);
+		const remainingCurrentIntents = config?.currentIntents
+			? structuredClone(config.currentIntents)
+			: [];
 		const callIntents = [];
 		// Whether or not the "other" intent was already identified
 		const hasExistingOther =
@@ -249,11 +251,13 @@ ${text}
 					}
 				}
 			} else {
-				for (const curIntents of config.currentIntents) {
-					if (!calledIntentIds.has(curIntents.id)) {
-						// Clean up the unused intents
-						this.intents[curIntents.name].onCleanup(curIntents, text);
-						this.config.onCleanup(curIntents, text);
+				if (config?.currentIntents) {
+					for (const curIntents of config.currentIntents) {
+						if (!calledIntentIds.has(curIntents.id)) {
+							// Clean up the unused intents
+							this.intents[curIntents.name].onCleanup(curIntents, text);
+							this.config.onCleanup(curIntents, text);
+						}
 					}
 				}
 			}

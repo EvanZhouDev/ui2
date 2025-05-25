@@ -18,8 +18,12 @@ This is the code we will be writing:
 
 ```ts
 import { createUI2 } from "ui2-sdk";
-import { cerebras } from "@ai-sdk/cerebras";
 import { z } from "zod";
+import { createCerebras } from "@ai-sdk/cerebras";
+
+const cerebras = createCerebras({
+	apiKey: "API_KEY",
+});
 
 let { identifyIntent } = createUI2({
 	model: cerebras("llama-3.3-70b"),
