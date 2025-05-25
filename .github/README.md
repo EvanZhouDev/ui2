@@ -35,6 +35,14 @@ UI2 can be described with four core ideas:
 3. **Context**: Not only is intent detection based off of the text that you are typing, it also draws context from everything in your app—Allowing more powerful and more accurate intents.
 4. **Instant Preview**: Imagine autocomplete for _actions_—not just words, in which you can "preview-before-committing."
 
+## Examples
+
+See examples in the `/examples` directory. It includes:
+
+- [**Basic Quick Start**](https://github.com/EvanZhouDev/ui2/tree/main/examples/quick-start): Source code for the basic [Quick Start in the UI2 Docs](https://ui2-docs.vercel.app/quick-start/overview)
+- [**React Quick Start**](https://github.com/EvanZhouDev/ui2/tree/main/examples/react-quick-start): Source code for the [React Quick Start in the UI2 Docs](https://ui2-docs.vercel.app/react-quick-start/overview)
+- [**Todo App Example**](https://github.com/EvanZhouDev/ui2/tree/main/examples/todo-list): Source code for the todo app shown at the top of this README
+
 ## Install
 
 Install with NPM, or your favorite package manager.
