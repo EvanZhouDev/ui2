@@ -1,57 +1,48 @@
-# UI2
+# UI2: The Unified Intent Interface
 
 ![UI2 Demo](./docs/public/ui2-demo.gif)
 
-> Introducing the **Unified Intent Interface**
+> A UI2-powered todo app, showing **Intent Detection** and **Instant Preview**
 
-## What is it?
+UI2 seeks to directly convert user intention into action. Think if an assistant like Siri was implemented directly into an application—but you can type to it, and due to its deep integration, it's accurate, powerful, and _fast_.
 
-A framework for creating a Unified Intent Interface (UI2).
+And not only that, you can see exactly what that assistant would do as you are typing.
 
-It all revolves around a single textbox, which essentially is able to control an entire application, including searching, taking action, and more.
+Learn more and get started with development at [ui2-docs.vercel.app](https://ui2-docs.vercel.app)
 
-It allows you to, in live-time, detect user intent as they are typing in that textbox and present a preview of whatever action or query they are taking.
+## The Problem
 
-Then, should they want to actually take the action, they can easily confirm the changes.
+The idea of the User Interface has always been the same since it's creation.
 
-## Philosophy
+1. You have an **intention** to do something
+2. You formulate how to **translate** that Intention into Actions
+3. You take those **actions** on the UI to achieve your goal
 
-Search, taking action, and everything else you can do on an application should not be separate interfaces, but rather unified into one.
+But imagine a world where there is no barrier between **intention** and **action**. One where you can directly express your **Intent**—and have the computer handle the rest for you.
 
-The reason why they have always been separated is because there has never been a way to identify a user's Intent—fast enough, and accurate enough—to merge all the experiences into one. But in today's world of LLMs, this is now possible.
+That very _idea_ is UI2.
 
-But not only that, UI2 enables the idea of instant intent detection. What if as you are typing, what is autocompleted is not _words_, but rather _actions_?
+## What is UI2?
 
-Powered by Cerebras Instant Inference API, you are now able to see the impacts of your actions in a "preview-before-comitting" style—in other words, an adaptive UI that changes around you depending on your intent.
+UI2, or the **Unified Intent Interface** is a framework for a natural-language interface to any application.
 
-## Use Cases for UI2
+It is powered by the idea of **Intent Identification**, merging all the intents in your app—searching, taking action, and more—into a single natural language interface.
 
-UI2 is best suited for cases where there are already multiple textboxes that do multiple actions, and that can benefit from a "preview-before-committing" pipeline.
+UI2 can be described with four core ideas:
 
-For example, in a Reminder app, one can do the following actions:
-
-- Create a reminder
-- Edit a reminder
-- Search for reminders
-
-In this case, through UI2, a single textbox is enough to do all of the tasks.
-
-But at the same time, UI2 can also be used for other "preview-before-committing" tasks such as:
-
-- A unified interface for database management
-  - "Delete all inactive users"
-  - "Merge duplicate customer records"
-
-## Naming
-
-UI2 stands for the Unified Intent Interface.
-
-However, the naming also implies the "Second-Generation" of UI.
-
-You should solely refer to the project as UI2 or ui2 and not in other forms, like "UII", "UI Two", and so on.
+1. **Unification**: Search, taking action, and everything else you can do on an application should not be separate interfaces, but rather unified into one.
+2. **Intent Detection**: The key point in combining these interfaces is identifying the user intent, now possible through LLMs
+3. **Context**: Not only is intent detection based off of the text that you are typing, it also draws context from everything in your app—Allowing more powerful and more accurate intents.
+4. **Instant Preview**: Imagine autocomplete for _actions_—not just words, in which you can "preview-before-committing."
 
 ## Install
 
+Install with NPM, or your favorite package manager.
+
 ```bash
-npm i ui2.js
+npm i ui2-sdk
 ```
+
+## Get Started
+
+Learn more and get started with development at [ui2-docs.vercel.app](https://ui2-docs.vercel.app)
