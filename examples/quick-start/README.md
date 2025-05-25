@@ -10,6 +10,6 @@ First, swap out the line that reads `apiKey: "API_KEY"` with your Cerebras API k
 
 Then, try running this code with:
 
-```js
+```bash
 node index.js
 ```
