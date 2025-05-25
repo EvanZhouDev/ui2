@@ -392,7 +392,7 @@ export default function Page() {
 				<input
 					className="p-1 outline"
 					value={inputValue}
-					onChange={handleInputChange}
+					onChange={(e) => handleInputChange(e.target.value)}
 				/>
 				<button className="p-1 outline" onClick={handleSubmit}>
 					Submit
