@@ -105,7 +105,7 @@ The `IntentCreator` class also has a few significant methods to be aware of.
 ### `identifyIntent`
 
 ```ts
-async identifyIntent(text: string, config?: IdentifyIntentConfig): void
+async identifyIntent(text: string, config?: IdentifyIntentConfig): IntentCall[]
 ```
 
 This takes two parameters: The current `text` to identify as well as an optional configuration object.
