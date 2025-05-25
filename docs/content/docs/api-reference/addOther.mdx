@@ -14,11 +14,7 @@ This intent is rarely called, but you can instruct the AI to do so more commonly
 
 ## The `other` Intent Lifecycle
 
-Furthermore, the `onIntent` and `onCleanup` cycle is slightly different for the `other` intent.
-
-Most importantly, know that `onCleanup` is only called when there is any `other` intent identified and later removed.
-
-This means that even if the content is different and there is an `other` intent in `currentIntents`, it is possible no cleanup and re-trigger is called.
+Furthermore, the lifecycle of `other` is slightly different than normal intents. Specifically, because the `other` intent does not have any parameters, the following will occur `onIntent` only occurs when the intents identified goes from anything that is _not `other`_ to _`other`_. In other words, even if the content of the input changes, and it was `other` before and after, `onIntent` will not be called again.
 
 ## `addOther` Parameters
 
