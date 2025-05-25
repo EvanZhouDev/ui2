@@ -56,7 +56,7 @@ export default function Page() {
 	let { inputValue, handleInputChange, handleSubmit } = useUI2({
 		model: cerebras("llama-3.3-70b"),
 		systemPrompt: "This is a todo app.",
-		context: todos.filter(x => !x.preview),
+		context: todos.filter((x) => !x.preview),
 	})
 		.addIntent("addTodo", {
 			description: "Add a todo",
@@ -74,9 +74,9 @@ export default function Page() {
 					},
 				]);
 			},
-			onCleanup: ({parameters, id}) => {
-				setTodos((prev) => prev.filter((x) => x.id !== id))
-			}
+			onCleanup: ({ parameters, id }) => {
+				setTodos((prev) => prev.filter((x) => x.id !== id));
+			},
 			onSubmit: ({ id }) =>
 				setTodos((prev) =>
 					prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
@@ -98,13 +98,13 @@ export default function Page() {
 			},
 			onCleanup: ({ parameters }) => {
 				setTodos((prev) =>
-						prev.map((x) =>
-							x.id === parameters.id
-								? { ...x, preview: false, completed: false }
-								: x
-						)
-					);
-			}
+					prev.map((x) =>
+						x.id === parameters.id
+							? { ...x, preview: false, completed: false }
+							: x
+					)
+				);
+			},
 			onSubmit: ({ parameters }) =>
 				setTodos((prev) =>
 					prev.map((x) =>
@@ -130,7 +130,7 @@ export default function Page() {
 					value={inputValue}
 					onChange={(e) => handleInputChange(e.target.value)}
 				/>
-				<button className="p-1 outline" onClick={onSubmit}>
+				<button className="p-1 outline" onClick={handleSubmit}>
 					Submit
 				</button>
 			</div>

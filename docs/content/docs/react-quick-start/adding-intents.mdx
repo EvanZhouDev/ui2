@@ -334,7 +334,7 @@ export default function Page() {
 			},
 			onCleanup: ({parameters, id}) => {
 				setTodos((prev) => prev.filter((x) => x.id !== id))
-			}
+			},
 			onSubmit: ({ id }) =>
 				setTodos((prev) =>
 					prev.map((x) => (x.id === id ? { ...x, preview: false } : x))
