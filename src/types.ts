@@ -30,7 +30,7 @@ export type UI2Config = {
 
 export type IntentPartialOptional<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
-	onIntent: (intentCall: IntentCall<T>, input: string) => void;
+	onIntent: (intentCall: IntentCall<T>, input: string) => any;
 	description?: string;
 	onCleanup?: (intentCall: IntentCall<T>, input: string) => void;
 };
@@ -38,7 +38,7 @@ export type IntentPartialOptional<T extends z.ZodType = z.ZodObject<any>> = {
 export type Intent<T extends z.ZodType = z.ZodObject<any>> = {
 	parameters: T;
 	description: string;
-	onIntent: (intentCall: IntentCall<T>, input: string) => void;
+	onIntent: (intentCall: IntentCall<T>, input: string) => any;
 	onCleanup: (intentCall: IntentCall<T>, input: string) => void;
 };
 
