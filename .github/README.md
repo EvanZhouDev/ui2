@@ -1,6 +1,6 @@
 # UI2: The Unified Intent Interface
 
-![UI2 Demo](../docs/public/ui2-demo.gif)
+![UI2 Demo](../docs/public/ui2-todo-demo.gif)
 
 > A UI2-powered todo app, showing **Intent Detection** and **Instant Preview**
 
